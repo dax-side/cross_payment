@@ -37,8 +37,6 @@ Register two accounts, deposit fake money to one, send it to the other by email,
 - Transaction history with blockchain hashes
 - Treasury wallet balance monitoring
 
-API docs are at `http://localhost:5000/api-docs` when the backend's running.
-
 ## The tech decisions
 
 **Polygon instead of Ethereum**: Gas costs $0.001 vs $5-50. Transactions confirm in 5 seconds vs 15+ seconds. Ethereum mainnet would make this unusable for small payments.
