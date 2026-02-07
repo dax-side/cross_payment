@@ -182,56 +182,12 @@ export default function Landing() {
               <span className="text-[11px] uppercase tracking-[0.3em] text-slate-500">Security</span>
               <div className="h-px flex-1 bg-gradient-to-r from-slate-300 to-transparent" />
             </div>
-            <div className="grid lg:grid-cols-[1.2fr_1fr] gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-serif font-semibold mb-4">Security basics, no fluff</h3>
-                <p className="text-slate-600 mb-6">
-                  Passwords are hashed, treasury keys are encrypted, and access tokens expire.
-                </p>
-                <ul className="space-y-3 text-sm text-slate-600">
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 h-5 w-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    Short-lived access tokens with refresh tokens
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 h-5 w-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    AES-256-GCM encryption for treasury keys
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1 h-5 w-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    bcrypt password hashing for user accounts
-                  </li>
-                </ul>
-              </div>
-              <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]">
-                <p className="text-sm text-slate-500 mb-4">Session details</p>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Access tokens</span>
-                    <span className="text-sm font-semibold text-[#1f3b5c]">15 minutes</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Refresh tokens</span>
-                    <span className="text-sm font-semibold text-[#1f3b5c]">7 days</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Logs</span>
-                    <span className="text-sm font-semibold text-[#1f3b5c]">Structured</span>
-                  </div>
-                </div>
-              </div>
+            <div className="max-w-2xl">
+              <h3 className="text-2xl font-serif font-semibold mb-4">Security details</h3>
+              <p className="text-slate-600">
+                This demo uses standard authentication and safe key handling. Check the README
+                for the full list of protections and limitations.
+              </p>
             </div>
           </section>
 
