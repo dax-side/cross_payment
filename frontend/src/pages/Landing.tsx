@@ -44,12 +44,12 @@ export default function Landing() {
                 Cross-border payments, simplified
               </p>
               <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight leading-tight mb-5">
-                Send money globally with clear rates and instant settlement.
+                Send GBP. Settle in USDC on Polygon.
               </h2>
               <div className="h-px w-24 bg-gradient-to-r from-[#b07a2a] via-[#d9b47a] to-transparent mb-6" />
               <p className="text-lg text-slate-600 mb-8">
-                Move funds with USDC on Polygon. Transparent fees, compliant onboarding, and
-                wallet-based access for teams and individuals.
+                Send by email, convert GBP to USDC at live rates, and settle on-chain in
+                seconds. One flat 0.5% fee with a clear breakdown.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -66,7 +66,7 @@ export default function Landing() {
                 </a>
               </div>
               <div className="mt-8 flex items-center gap-6 text-sm text-slate-500">
-                <span>15m average settlement</span>
+                <span>Seconds on-chain settlement</span>
                 <span>•</span>
                 <span>24/7 availability</span>
               </div>
@@ -97,37 +97,37 @@ export default function Landing() {
             </div>
             <div className="bg-white border border-slate-200/80 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.55)] p-6">
               <div className="flex items-center justify-between mb-6">
-                <p className="text-sm font-medium">Live corridor preview</p>
+                <p className="text-sm font-medium">Sample transfer</p>
                 <span className="text-xs text-slate-500 inline-flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Updated just now
+                  Example only
                 </span>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
                   <div>
                     <p className="text-xs text-slate-500">You send</p>
-                    <p className="text-base font-semibold">$2,500</p>
+                    <p className="text-base font-semibold">£100</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500">Fee</p>
-                    <p className="text-base font-semibold">$4.20</p>
+                    <p className="text-base font-semibold">£0.50</p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
                   <div>
                     <p className="text-xs text-slate-500">Recipient gets</p>
-                    <p className="text-base font-semibold">₦3,980,000</p>
+                    <p className="text-base font-semibold">123.10 USDC</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500">Rate</p>
-                    <p className="text-base font-semibold">1,595.2</p>
+                    <p className="text-base font-semibold">1.24 USD/GBP</p>
                   </div>
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-4 text-xs text-slate-500">
                 <div className="rounded-lg border border-slate-200 px-3 py-2">USDC settlement</div>
-                <div className="rounded-lg border border-slate-200 px-3 py-2">Compliance-ready</div>
+                <div className="rounded-lg border border-slate-200 px-3 py-2">Amoy testnet</div>
               </div>
             </div>
           </section>
@@ -168,9 +168,9 @@ export default function Landing() {
                     <path d="M3 21a6 6 0 0 1 10.5-3.5M10.5 17.5A6 6 0 0 1 21 21" strokeLinecap="round" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-serif font-semibold mb-2">Built for teams</h3>
+                <h3 className="text-lg font-serif font-semibold mb-2">Email-based delivery</h3>
                 <p className="text-sm text-slate-600">
-                  Role-based access, audit trails, and wallet controls for operations teams.
+                  Send by recipient email. We route funds to their saved wallet address.
                 </p>
               </div>
             </div>
@@ -184,10 +184,9 @@ export default function Landing() {
             </div>
             <div className="grid lg:grid-cols-[1.2fr_1fr] gap-8 items-center">
               <div>
-                <h3 className="text-2xl font-serif font-semibold mb-4">Security and compliance at the core</h3>
+                <h3 className="text-2xl font-serif font-semibold mb-4">Security basics, no fluff</h3>
                 <p className="text-slate-600 mb-6">
-                  We keep your funds protected with strict key management, automated risk checks,
-                  and detailed audit logs.
+                  Passwords are hashed, treasury keys are encrypted, and access tokens expire.
                 </p>
                 <ul className="space-y-3 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
@@ -196,7 +195,7 @@ export default function Landing() {
                         <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
-                    Token lifecycle controls for access and refresh flows
+                    Short-lived access tokens with refresh tokens
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="mt-1 h-5 w-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center">
@@ -204,7 +203,7 @@ export default function Landing() {
                         <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
-                    Signed transaction approvals with anomaly detection
+                    AES-256-GCM encryption for treasury keys
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="mt-1 h-5 w-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center">
@@ -212,20 +211,24 @@ export default function Landing() {
                         <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
-                    Continuous monitoring with instant incident alerts
+                    bcrypt password hashing for user accounts
                   </li>
                 </ul>
               </div>
               <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]">
-                <p className="text-sm text-slate-500 mb-4">Operational safeguards</p>
+                <p className="text-sm text-slate-500 mb-4">Session details</p>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Wallet approvals</span>
-                    <span className="text-sm font-semibold text-[#1f3b5c]">4 eyes</span>
+                    <span className="text-sm">Access tokens</span>
+                    <span className="text-sm font-semibold text-[#1f3b5c]">15 minutes</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Transaction limits</span>
-                    <span className="text-sm font-semibold text-[#1f3b5c]">Configurable</span>
+                    <span className="text-sm">Refresh tokens</span>
+                    <span className="text-sm font-semibold text-[#1f3b5c]">7 days</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Logs</span>
+                    <span className="text-sm font-semibold text-[#1f3b5c]">Structured</span>
                   </div>
                 </div>
               </div>
@@ -245,7 +248,7 @@ export default function Landing() {
                   <div>
                     <h3 className="text-2xl font-serif font-semibold mb-2">Simple pricing</h3>
                     <p className="text-slate-600">
-                      One transparent fee per transfer. Volume pricing for enterprise accounts.
+                      One transparent fee per transfer. 0.5% with a £0.01 minimum.
                     </p>
                   </div>
                   <Link
