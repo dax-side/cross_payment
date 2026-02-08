@@ -187,7 +187,7 @@ export const previewPayment = async (req: Request, res: Response): Promise<void>
     throw new BadRequestError(ErrorMessages.VALIDATION.INVALID_AMOUNT);
   }
 
-  const conversion = blockchainService.convertGBPToUSDC(amountGBP);
+  const conversion = await blockchainService.convertGBPToUSDC(amountGBP);
 
   sendSuccess(res, SuccessMessages.PAYMENT.PREVIEW_SUCCESS, {
     amountGBP,
@@ -209,14 +209,14 @@ export const previewPayment = async (req: Request, res: Response): Promise<void>
  *         description: Exchange rate retrieved
  */
 export const getExchangeRate = async (_req: Request, res: Response): Promise<void> => {
-  const rate = blockchainService.getExchangeRate('GBP', 'USDC');
+  const { rate, source, timestamp } = await blockchainService.getExchangeRateWithMeta();
 
   const exchangeRate: IExchangeRate = {
     from: 'GBP',
     to: 'USDC',
     rate,
-    timestamp: new Date()
+    timestamp: new Date(timestamp)
   };
 
-  sendSuccess(res, SuccessMessages.RATES.RETRIEVED, exchangeRate);
+  sendSuccess(res, SuccessMessages.RATES.RETRIEVED, { ...exchangeRate, source });
 };
