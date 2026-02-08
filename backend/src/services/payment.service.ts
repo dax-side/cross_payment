@@ -4,6 +4,7 @@ import { Transaction } from '../models/Transaction.model';
 import { blockchainService } from './blockchain.service';
 import { logger } from '../config/logger';
 import { ITransactionResponse } from '../types';
+import { emitTransactionUpdate, emitBalanceUpdate } from '../config/socket';
 
 interface SendPaymentInput {
   senderId: string;
@@ -52,7 +53,7 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
       return { success: false, error: 'Insufficient balance' };
     }
 
-    const conversion = blockchainService.convertGBPToUSDC(input.amountGBP);
+    const conversion = await blockchainService.convertGBPToUSDC(input.amountGBP);
 
     const transaction = new Transaction({
       senderId: sender._id,
@@ -82,6 +83,8 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
     transaction.status = 'processing';
     await transaction.save({ session });
 
+    emitTransactionUpdate(input.senderId, transaction.toResponse() as unknown as Record<string, unknown>);
+
     const transferResult = await blockchainService.transferUSDC(
       recipient.walletAddress,
       conversion.amountUSDC.toFixed(6)
@@ -97,6 +100,8 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
 
       await session.commitTransaction();
 
+      emitTransactionUpdate(input.senderId, transaction.toResponse() as unknown as Record<string, unknown>);
+
       logger.error('Payment failed', {
         transactionId: transaction._id.toString(),
         error: transferResult.error
@@ -110,6 +115,9 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
     await transaction.save({ session });
 
     await session.commitTransaction();
+
+    emitTransactionUpdate(input.senderId, transaction.toResponse() as unknown as Record<string, unknown>);
+    emitBalanceUpdate(input.senderId, { fiatBalance: sender.fiatBalance });
 
     logger.info('Payment completed', {
       transactionId: transaction._id.toString(),
