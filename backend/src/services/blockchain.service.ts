@@ -10,11 +10,15 @@ const USDC_ABI = [
 
 const POLYGON_AMOY_CHAIN_ID = 80002;
 
-const EXCHANGE_RATES: Record<string, number> = {
+const FALLBACK_RATES: Record<string, number> = {
   'GBP_USDC': 1.27,
   'USD_USDC': 1.0,
   'EUR_USDC': 1.08
 };
+
+// In-memory cache for live rates
+let rateCache: { rate: number; timestamp: number; source: string } | null = null;
+const RATE_CACHE_TTL = 60_000; // 60 seconds
 
 const FEE_PERCENTAGE = 0.005;
 const MIN_FEE = 0.01;
@@ -75,10 +79,53 @@ const getUSDCBalance = async (walletAddress: string): Promise<string> => {
   }
 };
 
-const getExchangeRate = (from: string, to: string): number => {
+const fetchLiveGBPRate = async (): Promise<{ rate: number; source: string }> => {
+  const now = Date.now();
+  if (rateCache && (now - rateCache.timestamp) < RATE_CACHE_TTL) {
+    return { rate: rateCache.rate, source: rateCache.source };
+  }
+
+  try {
+    // CoinGecko free API: GBP price of USDC (which should be ~1/GBP_USD)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=usd-coin&vs_currencies=gbp',
+      { signal: controller.signal }
+    );
+    clearTimeout(timeout);
+
+    if (!res.ok) throw new Error(`CoinGecko responded ${res.status}`);
+
+    const data = await res.json() as { 'usd-coin'?: { gbp?: number } };
+    const gbpPerUsdc = data['usd-coin']?.gbp;
+
+    if (!gbpPerUsdc || gbpPerUsdc <= 0) throw new Error('Invalid rate from CoinGecko');
+
+    // We need GBP_USDC rate: how many USDC per 1 GBP
+    const rate = 1 / gbpPerUsdc;
+
+    rateCache = { rate, timestamp: now, source: 'coingecko' };
+    logger.info('Fetched live exchange rate', { rate, source: 'coingecko' });
+    return { rate, source: 'coingecko' };
+  } catch (error) {
+    logger.warn('Failed to fetch live rate, using fallback', { error });
+    const fallback = FALLBACK_RATES['GBP_USDC'] ?? 1.27;
+    return { rate: fallback, source: 'fallback' };
+  }
+};
+
+const getExchangeRate = async (from: string, to: string): Promise<number> => {
   if (from === to) return 1;
+
+  if (from === 'GBP' && to === 'USDC') {
+    const { rate } = await fetchLiveGBPRate();
+    return rate;
+  }
+
   const key = `${from}_${to}`;
-  const rate = EXCHANGE_RATES[key];
+  const rate = FALLBACK_RATES[key];
   if (rate === undefined) {
     logger.warn('Exchange rate not found, using default', { from, to });
     return 1;
@@ -86,13 +133,22 @@ const getExchangeRate = (from: string, to: string): number => {
   return rate;
 };
 
+const getExchangeRateWithMeta = async (): Promise<{ rate: number; source: string; timestamp: string }> => {
+  const { rate, source } = await fetchLiveGBPRate();
+  return {
+    rate,
+    source,
+    timestamp: new Date().toISOString()
+  };
+};
+
 const calculateFee = (amountGBP: number): number => {
   const fee = amountGBP * FEE_PERCENTAGE;
   return Math.max(fee, MIN_FEE);
 };
 
-const convertGBPToUSDC = (amountGBP: number): ConversionResult => {
-  const exchangeRate = getExchangeRate('GBP', 'USDC');
+const convertGBPToUSDC = async (amountGBP: number): Promise<ConversionResult> => {
+  const exchangeRate = await getExchangeRate('GBP', 'USDC');
   const fee = calculateFee(amountGBP);
   const amountAfterFee = amountGBP - fee;
   const amountUSDC = amountAfterFee * exchangeRate;
@@ -193,6 +249,7 @@ export const blockchainService = {
   getMasterWallet,
   getUSDCBalance,
   getExchangeRate,
+  getExchangeRateWithMeta,
   calculateFee,
   convertGBPToUSDC,
   transferUSDC,
