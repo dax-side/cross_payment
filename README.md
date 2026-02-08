@@ -54,7 +54,3 @@ Register two accounts, deposit fake money to one, send it to the other by email,
 This is a demo. The fiat side is mocked (buttons that add fake GBP balance). A production version would need Stripe, Plaid, or bank APIs for real deposits/withdrawals. KYC would become mandatory past certain amounts depending on jurisdiction. Rate limiting isn't implemented. No email notifications. Security's decent but not audited.
 
 The code's MIT licensed. Fork it, change it, deploy it, sell it. Do whatever you want.
-
-## If something breaks
-
-Check logs in `backend/logs/`. Balance issues usually mean the treasury wallet ran out of USDC. Blockchain errors are often RPC rate limits or wrong private keys. Frontend errors show in browser console.
