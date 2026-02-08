@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import http from 'http';
 import { createApp } from './app';
 import { connectDatabase } from './config/db';
 import { logger } from './config/logger';
+import { initSocket } from './config/socket';
 
 const PORT = process.env.PORT ?? 4000;
 
@@ -13,12 +15,16 @@ const startServer = async (): Promise<void> => {
     await connectDatabase();
 
     const app = createApp();
+    const httpServer = http.createServer(app);
 
-    app.listen(PORT, () => {
+    initSocket(httpServer);
+
+    httpServer.listen(PORT, () => {
       logger.info(`Server started on port ${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV ?? 'development',
-        apiDocs: `http://localhost:${PORT}/api-docs`
+        apiDocs: `http://localhost:${PORT}/api-docs`,
+        websocket: 'enabled'
       });
     });
   } catch (error) {
