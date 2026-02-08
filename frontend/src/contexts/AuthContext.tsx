@@ -5,8 +5,6 @@ import { authApi } from '../lib/api';
 interface User {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
   walletAddress: string;
 }
 

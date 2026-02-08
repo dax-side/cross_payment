@@ -150,3 +150,14 @@ export const ratesApi = {
   current: () =>
     api.get('/rates'),
 };
+
+export const analyticsApi = {
+  summary: () =>
+    api.get('/analytics/summary'),
+
+  export: () =>
+    api.get('/analytics/export', { responseType: 'blob' }),
+
+  lookupRecipient: (email: string) =>
+    api.get('/analytics/lookup', { params: { email } }),
+};
