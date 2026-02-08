@@ -16,9 +16,8 @@ const FALLBACK_RATES: Record<string, number> = {
   'EUR_USDC': 1.08
 };
 
-// In-memory cache for live rates
 let rateCache: { rate: number; timestamp: number; source: string } | null = null;
-const RATE_CACHE_TTL = 60_000; // 60 seconds
+const RATE_CACHE_TTL = 60_000;
 
 const FEE_PERCENTAGE = 0.005;
 const MIN_FEE = 0.01;
@@ -86,7 +85,6 @@ const fetchLiveGBPRate = async (): Promise<{ rate: number; source: string }> => 
   }
 
   try {
-    // CoinGecko free API: GBP price of USDC (which should be ~1/GBP_USD)
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
@@ -103,7 +101,6 @@ const fetchLiveGBPRate = async (): Promise<{ rate: number; source: string }> => 
 
     if (!gbpPerUsdc || gbpPerUsdc <= 0) throw new Error('Invalid rate from CoinGecko');
 
-    // We need GBP_USDC rate: how many USDC per 1 GBP
     const rate = 1 / gbpPerUsdc;
 
     rateCache = { rate, timestamp: now, source: 'coingecko' };
