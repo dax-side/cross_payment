@@ -24,7 +24,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@dax-side/jwt-abstraction": "^0.2.4",
+    "@dax-side/jwt-abstraction": "^0.2.6",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
