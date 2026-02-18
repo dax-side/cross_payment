@@ -1,24 +1,31 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useDarkMode } from '../hooks/useDarkMode';
 
 export default function Landing() {
   const { dark, toggle } = useDarkMode();
+  const [sendAmount, setSendAmount] = useState(100);
+  const fee = +(sendAmount * 0.005).toFixed(2);
+  const net = +(sendAmount - fee).toFixed(2);
+  // Mock rate — live rate comes from backend in real usage
+  const rate = 1.2631;
+  const recipientGets = +(net * rate).toFixed(2);
 
   return (
-    <div className="min-h-screen bg-[#f6f2eb] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-screen bg-[#f5f0e8] dark:bg-[#0c1117] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#cbd5e1]/40 dark:bg-[#cbd5e1]/10 blur-3xl" />
-          <div className="absolute top-40 -left-24 h-80 w-80 rounded-full bg-[#fde7c7]/55 dark:bg-[#fde7c7]/10 blur-3xl" />
-          <div className="absolute bottom-0 right-10 h-64 w-64 rounded-full bg-[#dbe7dd]/50 dark:bg-[#dbe7dd]/10 blur-3xl" />
+          <div className="absolute -top-32 -right-32 h-[32rem] w-[32rem] rounded-full bg-[#e8c97a]/25 dark:bg-[#c8962a]/10 blur-3xl" />
+          <div className="absolute top-40 -left-24 h-80 w-80 rounded-full bg-[#d4e8f0]/40 dark:bg-[#1f3b5c]/20 blur-3xl" />
+          <div className="absolute bottom-0 right-10 h-64 w-64 rounded-full bg-[#c8e6d4]/40 dark:bg-[#1a4a2e]/20 blur-3xl" />
         </div>
 
         {/* Header */}
-        <header className="border-b border-slate-200/80 dark:border-slate-800">
+        <header className="border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl bg-[#1f3b5c] flex items-center justify-center">
-                <span className="text-[#d9b47a] font-serif font-bold text-lg">C</span>
+                <span className="text-[#e8c97a] font-serif font-bold text-lg">C</span>
               </div>
               <div>
                 <h1 className="text-lg font-semibold tracking-tight dark:text-white">CrossPay</h1>
@@ -47,7 +54,7 @@ export default function Landing() {
               </Link>
               <Link
                 to="/register"
-                className="text-sm bg-[#1f3b5c] text-white px-4 py-2 rounded-lg shadow-sm hover:bg-[#1a324d]"
+                className="text-sm bg-[#1f3b5c] text-white px-4 py-2 rounded-lg shadow-sm hover:bg-[#17304d] transition"
               >
                 Register
               </Link>
@@ -57,97 +64,107 @@ export default function Landing() {
 
         {/* Hero */}
         <main className="relative">
-          <section className="max-w-6xl mx-auto px-6 pt-16 pb-12 grid lg:grid-cols-2 gap-12 items-center">
+          <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 grid lg:grid-cols-2 gap-14 items-center">
+            {/* Copy */}
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400 mb-4">
-                Cross-border payments, simplified
+              <p className="text-xs uppercase tracking-[0.3em] text-[#b07a2a] dark:text-[#e8c97a] font-semibold mb-5">
+                Cross-border payments
               </p>
-              <h2 className="text-4xl md:text-5xl font-serif font-semibold tracking-tight leading-tight mb-5 dark:text-white">
-                Send GBP. Settle in USDC on Polygon.
+              <h2 className="text-5xl md:text-6xl font-serif font-bold tracking-tight leading-[1.05] mb-6 dark:text-white">
+                Send GBP.<br />
+                <span className="text-[#b07a2a] dark:text-[#e8c97a]">Settle in USDC.</span>
               </h2>
-              <div className="h-px w-24 bg-gradient-to-r from-[#b07a2a] via-[#d9b47a] to-transparent mb-6" />
-              <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-                Send by email, convert GBP to USDC at live rates, and settle on-chain in
-                seconds. One flat 0.5% fee with a clear breakdown.
+              <div className="h-[3px] w-20 bg-[#b07a2a] dark:bg-[#e8c97a] rounded-full mb-7" />
+              <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
+                Send by email. Convert at live rates. Settle on Polygon in seconds —{' '}
+                <span className="text-slate-800 dark:text-slate-200 font-medium">one flat 0.5% fee</span>, nothing hidden.
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 mb-10">
                 <Link
                   to="/register"
-                  className="bg-[#1f3b5c] text-white px-6 py-3 rounded-lg text-sm font-medium shadow-sm hover:bg-[#1a324d]"
+                  className="bg-[#1f3b5c] text-white px-7 py-3.5 rounded-xl text-sm font-semibold shadow-md hover:bg-[#17304d] transition"
                 >
-                  Get started
+                  Get started free
                 </Link>
                 <a
                   href="#security"
-                  className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                  className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-7 py-3.5 rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:border-[#b07a2a] dark:hover:border-[#e8c97a] transition"
                 >
                   View security
                 </a>
               </div>
-              <div className="mt-8 flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-                <span>Seconds on-chain settlement</span>
-                <span>•</span>
-                <span>24/7 availability</span>
-              </div>
-              <div className="mt-6 flex flex-wrap items-center gap-2">
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Explore</span>
-                <a
-                  href="#features"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition"
-                >
-                  <span className="h-2 w-2 rounded-full bg-[#1f3b5c]" />
-                  Features
-                </a>
-                <a
-                  href="#security"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition"
-                >
-                  <span className="h-2 w-2 rounded-full bg-[#b07a2a]" />
-                  Security
-                </a>
-                <a
-                  href="#pricing"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 transition"
-                >
-                  <span className="h-2 w-2 rounded-full bg-[#5b6b6f]" />
-                  Pricing
-                </a>
+              <div className="flex items-center gap-5 text-sm text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />On-chain settlement</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b07a2a] dark:bg-[#e8c97a]" />24/7 available</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" />No minimums</span>
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.55)] p-6">
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-sm font-medium dark:text-white">Sample transfer</p>
-                <span className="text-xs text-slate-500 dark:text-slate-400 inline-flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Example only
-                </span>
+
+            {/* Interactive Fee Calculator */}
+            <div className="bg-white dark:bg-[#141b26] border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-[0_32px_80px_-32px_rgba(15,23,42,0.4)] dark:shadow-[0_32px_80px_-32px_rgba(0,0,0,0.7)] p-7">
+              <div className="flex items-center justify-between mb-7">
+                <p className="text-base font-semibold dark:text-white tracking-tight">Fee calculator</p>
+                <span className="text-xs text-[#b07a2a] dark:text-[#e8c97a] font-medium bg-[#b07a2a]/10 dark:bg-[#e8c97a]/10 px-2.5 py-1 rounded-full">Live estimate</span>
               </div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-600 px-4 py-3">
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">You send</p>
-                    <p className="text-base font-semibold dark:text-white">£100</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Fee</p>
-                    <p className="text-base font-semibold dark:text-white">£0.50</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-600 px-4 py-3">
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Recipient gets</p>
-                    <p className="text-base font-semibold dark:text-white">123.10 USDC</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Rate</p>
-                    <p className="text-base font-semibold dark:text-white">1.24 USD/GBP</p>
-                  </div>
+
+              {/* Amount slider */}
+              <div className="mb-6">
+                <label className="text-xs uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-3 block">You send (GBP)</label>
+                <div className="relative flex items-center gap-4">
+                  <span className="text-3xl font-serif font-bold dark:text-white w-28 shrink-0">
+                    £{sendAmount.toLocaleString()}
+                  </span>
+                  <input
+                    type="range"
+                    min={10}
+                    max={5000}
+                    step={10}
+                    value={sendAmount}
+                    onChange={(e) => setSendAmount(Number(e.target.value))}
+                    className="flex-1 accent-[#b07a2a]"
+                  />
                 </div>
               </div>
-              <div className="mt-6 grid grid-cols-2 gap-4 text-xs text-slate-500 dark:text-slate-400">
-                <div className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2">USDC settlement</div>
-                <div className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-2">Amoy testnet</div>
+
+              {/* Breakdown */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">Platform fee (0.5%)</span>
+                  <span className="text-sm font-semibold text-red-500">−£{fee.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">Net converted</span>
+                  <span className="text-sm font-semibold dark:text-white">£{net.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-xl border-2 border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 px-4 py-3.5">
+                  <div>
+                    <p className="text-xs text-[#b07a2a] dark:text-[#e8c97a] font-medium uppercase tracking-wider mb-0.5">Recipient gets</p>
+                    <p className="text-2xl font-serif font-bold dark:text-white">{recipientGets.toLocaleString()} USDC</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400 mb-0.5">Rate</p>
+                    <p className="text-sm font-semibold dark:text-slate-200">1 GBP = {rate} USD</p>
+                  </div>
+                </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2.5 text-center">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Network</p>
+                  <p className="text-xs font-semibold dark:text-white">Polygon Amoy</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2.5 text-center">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-400 mb-0.5">Token</p>
+                  <p className="text-xs font-semibold dark:text-white">USDC (ERC-20)</p>
+                </div>
+              </div>
+
+              <Link
+                to="/register"
+                className="mt-5 block w-full text-center bg-[#1f3b5c] hover:bg-[#17304d] text-white py-3 rounded-xl text-sm font-semibold transition shadow-sm"
+              >
+                Send £{sendAmount.toLocaleString()} now →
+              </Link>
             </div>
           </section>
 
