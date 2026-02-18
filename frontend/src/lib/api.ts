@@ -10,7 +10,6 @@ export const api = axios.create({
   },
 });
 
-// Single in-flight refresh promise shared across all failing requests
 let refreshPromise: Promise<void> | null = null;
 
 api.interceptors.response.use(
@@ -22,7 +21,6 @@ api.interceptors.response.use(
     const isAuthUrl = originalRequest?.url?.includes('/auth/login') ||
                       originalRequest?.url?.includes('/auth/register');
 
-    // If the refresh endpoint itself failed, clear the lock and bail out
     if (isRefreshUrl) {
       refreshPromise = null;
       return Promise.reject(error);
@@ -35,7 +33,6 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      // Deduplicate: if a refresh is already in flight, wait for it
       if (!refreshPromise) {
         refreshPromise = axios
           .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
@@ -50,9 +47,6 @@ api.interceptors.response.use(
         await refreshPromise;
         return api(originalRequest);
       } catch {
-        // Refresh failed — just reject. ProtectedRoute handles redirecting
-        // unauthenticated users away from protected pages. Never force-redirect
-        // here or public pages (landing, login) break.
         return Promise.reject(error);
       }
     }

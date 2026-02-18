@@ -49,13 +49,11 @@ export default function Dashboard() {
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { onTransactionUpdate, onBalanceUpdate } = useSocket(user?.id);
 
-  // Form state
   const [recipientEmail, setRecipientEmail] = useState('');
   const [amountGBP, setAmountGBP] = useState('');
   const [transferLoading, setTransferLoading] = useState(false);
   const [preview, setPreview] = useState<{ amountUSDC: number; fee: number; exchangeRate: number } | null>(null);
 
-  // Data state
   const [fiatBalance, setFiatBalance] = useState<number | null>(null);
   const [usdcBalance, setUsdcBalance] = useState<string>('0');
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -68,11 +66,9 @@ export default function Dashboard() {
   const [treasuryAddress, setTreasuryAddress] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
 
-  // Wallet actions
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
 
-  // UI state
   const [initialLoading, setInitialLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -92,7 +88,6 @@ export default function Dashboard() {
     navigate('/');
   };
 
-  // --- Data Loading ---
   const loadBalance = useCallback(async () => {
     try {
       const { data } = await walletApi.balance();
@@ -145,7 +140,6 @@ export default function Dashboard() {
     );
   }, [loadBalance, loadRates, loadHistory, loadAnalytics]);
 
-  // --- WebSocket listeners ---
   useEffect(() => {
     const unsubTx = onTransactionUpdate((tx: Transaction) => {
       setTransactions((prev) => {
@@ -171,7 +165,6 @@ export default function Dashboard() {
     };
   }, [onTransactionUpdate, onBalanceUpdate]);
 
-  // --- Session restored toast ---
   useEffect(() => {
     if (sessionRestored) {
       toast('Session restored \u2014 you\u2019re still signed in.', { icon: '\uD83D\uDD12' });
@@ -179,20 +172,16 @@ export default function Dashboard() {
     }
   }, [sessionRestored, clearSessionRestored]);
 
-  // --- Stripe top-up success toast ---
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('topup') === '1') {
       toast.success('Top-up received! Balance will refresh shortly.', { duration: 5000 });
-      // Clean the query param without a full reload
       navigate('/dashboard', { replace: true });
-      // Re-fetch balance after a short delay (webhook may not have fired yet)
       setTimeout(() => loadBalance(), 3000);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- Recipient lookup (debounced) ---
   useEffect(() => {
     if (!recipientEmail || !recipientEmail.includes('@')) {
       setRecipientValid(null);
@@ -209,7 +198,6 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [recipientEmail]);
 
-  // --- Actions ---
   const handleTransfer = async (e: FormEvent) => {
     e.preventDefault();
     setTransferLoading(true);
@@ -294,7 +282,6 @@ export default function Dashboard() {
     loadHistory(next, true);
   };
 
-  // --- Render ---
   return (
     <div className="min-h-screen bg-[#f6f2eb] dark:bg-slate-950 transition-colors duration-300">
       {/* Header */}

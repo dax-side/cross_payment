@@ -13,8 +13,6 @@ import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string);
 
-// ─── Inner form (rendered inside <Elements>) ──────────────────────────────────
-
 function CheckoutForm({ amountGBP }: { amountGBP: number }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -29,11 +27,8 @@ function CheckoutForm({ amountGBP }: { amountGBP: number }) {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Stripe will redirect here after 3DS/bank auth if needed.
-        // We include ?topup=1 so Dashboard can show a success toast.
         return_url: `${window.location.origin}/dashboard?topup=1`,
       },
-      // Don't redirect for cards that don't need it — handle in-page
       redirect: 'if_required',
     });
 
@@ -41,7 +36,6 @@ function CheckoutForm({ amountGBP }: { amountGBP: number }) {
       toast.error(error.message ?? 'Payment failed');
       setPaying(false);
     } else {
-      // Payment succeeded without a redirect
       toast.success(`£${amountGBP} top-up successful! Balance will update shortly.`);
       navigate('/dashboard?topup=1');
     }
@@ -63,8 +57,6 @@ function CheckoutForm({ amountGBP }: { amountGBP: number }) {
     </form>
   );
 }
-
-// ─── Outer page: amount picker → creates PaymentIntent → shows card form ──────
 
 export default function TopUp() {
   const { dark, toggle } = useDarkMode();

@@ -29,13 +29,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // The axios interceptor handles token refresh automatically.
-        // If the access token is expired, it will refresh and retry the profile call.
-        // If the refresh token is also expired, it rejects and we just stay logged out.
         const { data } = await authApi.getProfile();
         setUser(data.data.user);
       } catch {
-        // Not authenticated — stay as guest, don't redirect
       } finally {
         setLoading(false);
       }

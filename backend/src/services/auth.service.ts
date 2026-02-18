@@ -126,7 +126,6 @@ const refreshTokens = async (refreshToken: string): Promise<{ tokens: ITokenPair
 };
 
 const requestPasswordReset = async (email: string): Promise<void> => {
-  // Always respond the same way regardless — don't reveal if email exists
   const user = await User.findByEmail(email.toLowerCase());
   if (!user) return;
 
@@ -147,7 +146,6 @@ const requestPasswordReset = async (email: string): Promise<void> => {
 const resetPassword = async (email: string, token: string, newPassword: string): Promise<void> => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-  // Re-query including the protected fields
   const user = await User
     .findOne({ email: email.toLowerCase() })
     .select('+passwordResetToken +passwordResetExpires');

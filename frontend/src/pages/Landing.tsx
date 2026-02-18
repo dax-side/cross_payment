@@ -7,7 +7,6 @@ export default function Landing() {
   const [sendAmount, setSendAmount] = useState(100);
   const fee = +(sendAmount * 0.005).toFixed(2);
   const net = +(sendAmount - fee).toFixed(2);
-  // Mock rate — live rate comes from backend in real usage
   const rate = 1.2631;
   const recipientGets = +(net * rate).toFixed(2);
 
