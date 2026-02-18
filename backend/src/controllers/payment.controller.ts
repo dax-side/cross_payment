@@ -223,8 +223,6 @@ export const getExchangeRate = async (_req: Request, res: Response): Promise<voi
   sendSuccess(res, SuccessMessages.RATES.RETRIEVED, { ...exchangeRate, source });
 };
 
-// ─── Stripe Top-Up ────────────────────────────────────────────────────────────
-
 /**
  * @swagger
  * /api/payment/topup/intent:
@@ -259,7 +257,6 @@ export const createTopUpIntent = async (req: Request, res: Response): Promise<vo
     throw new BadRequestError('Amount must be between £1 and £10,000');
   }
 
-  // Stripe amounts are in pence (smallest unit)
   const amountPence = Math.round(amountGBP * 100);
 
   const paymentIntent = await stripe.paymentIntents.create({
@@ -278,10 +275,11 @@ export const createTopUpIntent = async (req: Request, res: Response): Promise<vo
 };
 
 /**
- * Stripe webhook — must receive raw (un-parsed) request body.
+ * Stripe webhook receive raw (un-parsed) request body.
  * Called by Stripe on payment_intent.succeeded.
  * Credits user fiatBalance.
  */
+
 export const handleStripeWebhook = async (req: Request, res: Response): Promise<void> => {
   const sig = req.headers['stripe-signature'] as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -294,7 +292,6 @@ export const handleStripeWebhook = async (req: Request, res: Response): Promise<
 
   let event;
   try {
-    // req.body must be the raw Buffer — set in app.ts for this route
     event = stripe.webhooks.constructEvent(req.body as Buffer, sig, webhookSecret);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Webhook signature verification failed';
@@ -327,6 +324,5 @@ export const handleStripeWebhook = async (req: Request, res: Response): Promise<
     logger.info('Stripe top-up credited', { userId, amountGBP, newBalance: user.fiatBalance });
   }
 
-  // Always return 200 to acknowledge receipt
   res.json({ received: true });
 };
