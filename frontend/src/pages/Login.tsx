@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const resetSuccess = searchParams.get('reset') === '1';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,6 +47,11 @@ export default function Login() {
 
         <div className="bg-white border border-slate-200/80 rounded-2xl shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
+            {resetSuccess && (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
+                Password reset successfully. Sign in with your new password.
+              </div>
+            )}
             {error && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
                 {error}
@@ -87,6 +95,12 @@ export default function Login() {
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
+
+            <div className="text-center">
+              <Link to="/forgot-password" className="text-sm text-slate-500 hover:text-slate-700">
+                Forgot your password?
+              </Link>
+            </div>
           </form>
 
           <div className="mt-6 text-center">
