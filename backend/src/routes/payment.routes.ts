@@ -33,15 +33,11 @@ router.post(
   asyncHandler(paymentController.previewPayment)
 );
 
-// Stripe top-up: create a PaymentIntent and return client_secret
 router.post(
   '/topup/intent',
   authenticate,
   asyncHandler(paymentController.createTopUpIntent)
 );
-
-// Note: /topup/webhook is mounted in app.ts BEFORE json() middleware
-// so it receives the raw Buffer that Stripe requires for signature verification.
 
 router.get(
   '/:id',
