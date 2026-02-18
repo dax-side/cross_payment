@@ -57,7 +57,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   logger.info('User registered', { userId: result.user.id });
 
-  // Fire and forget — don't let a mail failure block the registration response
   sendWelcomeEmail(result.user.email).catch((err) =>
     logger.error('Welcome email failed', { error: err, email: result.user.email })
   );
