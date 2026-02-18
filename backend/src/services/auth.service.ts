@@ -1,11 +1,13 @@
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { User, IUserDocument } from '../models/User.model';
 import { walletService } from './wallet.service';
 import { logger } from '../config/logger';
+import { sendPasswordResetEmail } from '../config/email';
 import { IUserResponse, ITokenPair, IJWTPayloadData } from '../types';
 import { RegisterInput, LoginInput } from '../validation/schemas';
 import { jwt } from '../config/jwt';
-import { ConflictError, UnauthorizedError, ErrorMessages } from '../shared';
+import { ConflictError, UnauthorizedError, BadRequestError, ErrorMessages } from '../shared';
 
 const SALT_ROUNDS = 12;
 
@@ -123,6 +125,50 @@ const refreshTokens = async (refreshToken: string): Promise<{ tokens: ITokenPair
   }
 };
 
+const requestPasswordReset = async (email: string): Promise<void> => {
+  // Always respond the same way regardless — don't reveal if email exists
+  const user = await User.findByEmail(email.toLowerCase());
+  if (!user) return;
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  await user.save();
+
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const resetLink = `${frontendUrl}/reset-password?token=${rawToken}&email=${encodeURIComponent(email)}`;
+
+  await sendPasswordResetEmail(email, resetLink);
+  logger.info('Password reset requested', { email });
+};
+
+const resetPassword = async (email: string, token: string, newPassword: string): Promise<void> => {
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  // Re-query including the protected fields
+  const user = await User
+    .findOne({ email: email.toLowerCase() })
+    .select('+passwordResetToken +passwordResetExpires');
+
+  if (
+    !user ||
+    user.passwordResetToken !== hashedToken ||
+    !user.passwordResetExpires ||
+    user.passwordResetExpires < new Date()
+  ) {
+    throw new BadRequestError('Reset link is invalid or has expired.');
+  }
+
+  user.passwordHash = await hashPassword(newPassword);
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  logger.info('Password reset completed', { email });
+};
+
 export const authService = {
   register,
   login,
@@ -130,5 +176,7 @@ export const authService = {
   validatePassword,
   hashPassword,
   generateTokens,
-  refreshTokens
+  refreshTokens,
+  requestPasswordReset,
+  resetPassword
 };
