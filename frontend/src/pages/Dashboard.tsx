@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { paymentApi, ratesApi, walletApi, analyticsApi } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -45,6 +45,7 @@ const PAGE_SIZE = 10;
 export default function Dashboard() {
   const { user, logout, sessionRestored, clearSessionRestored } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { dark: darkMode, toggle: toggleDarkMode } = useDarkMode();
   const { onTransactionUpdate, onBalanceUpdate } = useSocket(user?.id);
 
@@ -177,6 +178,19 @@ export default function Dashboard() {
       clearSessionRestored();
     }
   }, [sessionRestored, clearSessionRestored]);
+
+  // --- Stripe top-up success toast ---
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('topup') === '1') {
+      toast.success('Top-up received! Balance will refresh shortly.', { duration: 5000 });
+      // Clean the query param without a full reload
+      navigate('/dashboard', { replace: true });
+      // Re-fetch balance after a short delay (webhook may not have fired yet)
+      setTimeout(() => loadBalance(), 3000);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Recipient lookup (debounced) ---
   useEffect(() => {
@@ -631,6 +645,20 @@ export default function Dashboard() {
                   <button type="submit" className={`h-11 px-6 ${btnPrimary}`}>Deposit</button>
                 </form>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Add GBP to your simulated fiat balance for testing.</p>
+                <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Or top up with a real card (Stripe test mode):</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/topup')}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 text-[#b07a2a] dark:text-[#e8c97a] text-sm font-semibold hover:border-[#b07a2a] dark:hover:border-[#e8c97a] transition"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                      <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                    Top Up with Card
+                  </button>
+                </div>
               </motion.div>
             )}
 
