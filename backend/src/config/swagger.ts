@@ -1,5 +1,8 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 
+const isDev = process.env.NODE_ENV !== 'production';
+const baseUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -13,8 +16,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:4000',
-        description: 'Development server'
+        url: baseUrl,
+        description: isDev ? 'Development server' : 'Production server'
       }
     ],
     components: {
@@ -86,10 +89,9 @@ const options: swaggerJsdoc.Options = {
       }
     ]
   },
-  apis: [
-    './src/routes/*.ts',
-    './src/controllers/*.ts'
-  ]
+  apis: isDev
+    ? ['./src/routes/*.ts', './src/controllers/*.ts']
+    : ['./dist/routes/*.js', './dist/controllers/*.js']
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
