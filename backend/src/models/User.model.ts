@@ -8,6 +8,8 @@ export interface IUserDocument extends Document {
   walletAddress: string;
   encryptedPrivateKey: string;
   fiatBalance: number;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
   toSafeObject(): IUserResponse;
@@ -51,6 +53,14 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
       type: Number,
       default: 0,
       min: [0, 'Fiat balance cannot be negative']
+    },
+    passwordResetToken: {
+      type: String,
+      select: false
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false
     }
   },
   {
