@@ -19,6 +19,8 @@ import analyticsRoutes from './routes/analytics.routes';
 const createApp = (): Express => {
   const app = express();
 
+  app.set('trust proxy', true);
+
   const corsOptions: cors.CorsOptions = {
     origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
     credentials: true,
