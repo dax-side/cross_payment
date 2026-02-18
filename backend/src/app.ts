@@ -9,6 +9,8 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { correlationId } from './middleware/correlationId';
 import { generalLimiter, authLimiter, paymentLimiter } from './middleware/rateLimiter';
 import { blockchainService } from './services/blockchain.service';
+import { handleStripeWebhook } from './controllers/payment.controller';
+import { asyncHandler } from './middleware/errorHandler';
 
 import authRoutes from './routes/auth.routes';
 import walletRoutes from './routes/wallet.routes';
@@ -19,16 +21,40 @@ import analyticsRoutes from './routes/analytics.routes';
 const createApp = (): Express => {
   const app = express();
 
-  app.set('trust proxy', true);
+  // Trust exactly one proxy hop (the platform's load balancer).
+  // `true` is too permissive and makes express-rate-limit's IP validation throw.
+  app.set('trust proxy', 1);
+
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ];
 
   const corsOptions: cors.CorsOptions = {
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow server-to-server requests (no origin) and any listed origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   };
 
   app.use(cors(corsOptions));
+
+  // ⚠️  Stripe webhook must receive the RAW request body (before json parser).
+  // Mount it here, before express.json(), so the Buffer is preserved.
+  app.post(
+    '/api/payment/topup/webhook',
+    express.raw({ type: 'application/json' }),
+    asyncHandler(handleStripeWebhook)
+  );
+
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
