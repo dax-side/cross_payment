@@ -21,8 +21,6 @@ import analyticsRoutes from './routes/analytics.routes';
 const createApp = (): Express => {
   const app = express();
 
-  // Trust exactly one proxy hop (the platform's load balancer).
-  // `true` is too permissive and makes express-rate-limit's IP validation throw.
   app.set('trust proxy', 1);
 
   const allowedOrigins = [
@@ -33,7 +31,6 @@ const createApp = (): Express => {
 
   const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-      // Allow server-to-server requests (no origin) and any listed origin
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -46,9 +43,7 @@ const createApp = (): Express => {
   };
 
   app.use(cors(corsOptions));
-
-  // ⚠️  Stripe webhook must receive the RAW request body (before json parser).
-  // Mount it here, before express.json(), so the Buffer is preserved.
+  
   app.post(
     '/api/payment/topup/webhook',
     express.raw({ type: 'application/json' }),
