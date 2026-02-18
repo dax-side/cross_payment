@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { paymentService } from '../services/payment.service';
 import { blockchainService } from '../services/blockchain.service';
 import { logger } from '../config/logger';
+import { stripe } from '../config/stripe';
+import { User } from '../models/User.model';
 import { IExchangeRate } from '../types';
 import { SendPaymentInput, PaginationInput } from '../validation/schemas';
 import { sendSuccess, SuccessMessages, UnauthorizedError, BadRequestError, NotFoundError, ErrorMessages } from '../shared';
@@ -219,4 +221,112 @@ export const getExchangeRate = async (_req: Request, res: Response): Promise<voi
   };
 
   sendSuccess(res, SuccessMessages.RATES.RETRIEVED, { ...exchangeRate, source });
+};
+
+// ─── Stripe Top-Up ────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /api/payment/topup/intent:
+ *   post:
+ *     summary: Create Stripe PaymentIntent for GBP top-up
+ *     tags: [Payment]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [amountGBP]
+ *             properties:
+ *               amountGBP:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 10000
+ *                 description: Top-up amount in GBP
+ *     responses:
+ *       200:
+ *         description: Returns clientSecret for Stripe Elements
+ */
+export const createTopUpIntent = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.userId;
+  if (!userId) throw new UnauthorizedError(ErrorMessages.AUTH.INVALID_TOKEN);
+
+  const { amountGBP } = req.body as { amountGBP: number };
+  if (typeof amountGBP !== 'number' || amountGBP < 1 || amountGBP > 10000) {
+    throw new BadRequestError('Amount must be between £1 and £10,000');
+  }
+
+  // Stripe amounts are in pence (smallest unit)
+  const amountPence = Math.round(amountGBP * 100);
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amountPence,
+    currency: 'gbp',
+    metadata: { userId, amountGBP: amountGBP.toString() },
+    automatic_payment_methods: { enabled: true },
+  });
+
+  logger.info('Stripe PaymentIntent created', { userId, amountGBP, intentId: paymentIntent.id });
+
+  sendSuccess(res, SuccessMessages.PAYMENT.TOPUP_INTENT_CREATED, {
+    clientSecret: paymentIntent.client_secret,
+    intentId: paymentIntent.id,
+  });
+};
+
+/**
+ * Stripe webhook — must receive raw (un-parsed) request body.
+ * Called by Stripe on payment_intent.succeeded.
+ * Credits user fiatBalance.
+ */
+export const handleStripeWebhook = async (req: Request, res: Response): Promise<void> => {
+  const sig = req.headers['stripe-signature'] as string;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    logger.error('STRIPE_WEBHOOK_SECRET not set');
+    res.status(500).json({ error: 'Webhook secret not configured' });
+    return;
+  }
+
+  let event;
+  try {
+    // req.body must be the raw Buffer — set in app.ts for this route
+    event = stripe.webhooks.constructEvent(req.body as Buffer, sig, webhookSecret);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Webhook signature verification failed';
+    logger.warn('Stripe webhook signature failed', { message });
+    res.status(400).json({ error: `Webhook error: ${message}` });
+    return;
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const intent = event.data.object;
+    const userId = intent.metadata?.userId;
+    const amountGBP = parseFloat(intent.metadata?.amountGBP ?? '0');
+
+    if (!userId || !amountGBP) {
+      logger.warn('Stripe webhook missing metadata', { intentId: intent.id });
+      res.json({ received: true });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      logger.warn('Stripe webhook: user not found', { userId, intentId: intent.id });
+      res.json({ received: true });
+      return;
+    }
+
+    user.fiatBalance = (user.fiatBalance || 0) + amountGBP;
+    await user.save();
+
+    logger.info('Stripe top-up credited', { userId, amountGBP, newBalance: user.fiatBalance });
+  }
+
+  // Always return 200 to acknowledge receipt
+  res.json({ received: true });
 };
