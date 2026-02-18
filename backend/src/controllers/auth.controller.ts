@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { authService } from '../services/auth.service';
 import { logger } from '../config/logger';
+import { sendWelcomeEmail } from '../config/email';
 import { RegisterInput, LoginInput, RefreshTokenInput } from '../validation/schemas';
 import { sendSuccess, SuccessMessages, UnauthorizedError, NotFoundError, ErrorMessages } from '../shared';
 
@@ -55,6 +56,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   });
 
   logger.info('User registered', { userId: result.user.id });
+
+  // Fire and forget — don't let a mail failure block the registration response
+  sendWelcomeEmail(result.user.email).catch((err) =>
+    logger.error('Welcome email failed', { error: err, email: result.user.email })
+  );
 
   sendSuccess(res, SuccessMessages.AUTH.REGISTER_SUCCESS, {
     user: result.user,
@@ -204,4 +210,70 @@ export const me = async (req: Request, res: Response): Promise<void> => {
   }
 
   sendSuccess(res, SuccessMessages.USER.PROFILE_RETRIEVED, { user: user.toSafeObject() });
+};
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request a password reset link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Reset link sent (always returns 200 to prevent email enumeration)
+ */
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  const { email } = req.body as { email: string };
+  await authService.requestPasswordReset(email).catch((err) => {
+    logger.error('Password reset request failed', { error: err });
+  });
+  sendSuccess(res, SuccessMessages.AUTH.PASSWORD_RESET_REQUESTED);
+};
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password using token from email link
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - token
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid or expired token
+ */
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const { email, token, password } = req.body as { email: string; token: string; password: string };
+  await authService.resetPassword(email, token, password);
+  sendSuccess(res, SuccessMessages.AUTH.PASSWORD_RESET_SUCCESS);
 };
