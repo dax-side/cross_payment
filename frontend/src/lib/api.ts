@@ -4,58 +4,56 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// Single in-flight refresh promise shared across all failing requests
+let refreshPromise: Promise<void> | null = null;
 
-// Response interceptor to handle token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 and not already retried, try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    const isRefreshUrl = originalRequest?.url?.includes('/auth/refresh');
+    const isAuthUrl = originalRequest?.url?.includes('/auth/login') ||
+                      originalRequest?.url?.includes('/auth/register');
+
+    // If the refresh endpoint itself failed, clear the lock and bail out
+    if (isRefreshUrl) {
+      refreshPromise = null;
+      return Promise.reject(error);
+    }
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthUrl
+    ) {
       originalRequest._retry = true;
 
+      // Deduplicate: if a refresh is already in flight, wait for it
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
+          .then(() => { refreshPromise = null; })
+          .catch((err) => {
+            refreshPromise = null;
+            throw err;
+          });
+      }
+
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
-
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
-
-        const tokens = data.data?.tokens;
-        if (!tokens?.accessToken || !tokens?.refreshToken) {
-          throw new Error('Invalid refresh response');
-        }
-
-        localStorage.setItem('accessToken', tokens.accessToken);
-        localStorage.setItem('refreshToken', tokens.refreshToken);
-
-        originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        await refreshPromise;
         return api(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+      } catch {
+        // Refresh failed — just reject. ProtectedRoute handles redirecting
+        // unauthenticated users away from protected pages. Never force-redirect
+        // here or public pages (landing, login) break.
+        return Promise.reject(error);
       }
     }
 
@@ -108,11 +106,17 @@ export const authApi = {
   logout: () =>
     api.post('/auth/logout'),
   
-  refresh: (refreshToken: string) =>
-    api.post('/auth/refresh', { refreshToken }),
+  refresh: () =>
+    api.post('/auth/refresh', {}),
 
   getProfile: () =>
     api.get('/auth/me'),
+
+  forgotPassword: (email: string) =>
+    api.post('/auth/forgot-password', { email }),
+
+  resetPassword: (email: string, token: string, password: string) =>
+    api.post('/auth/reset-password', { email, token, password }),
 };
 
 export const paymentApi = {
@@ -127,6 +131,12 @@ export const paymentApi = {
 
   getTransaction: (id: string) =>
     api.get(`/payment/${id}`),
+
+  createTopUpIntent: (amountGBP: number) =>
+    api.post<{ success: boolean; data: { clientSecret: string; intentId: string } }>(
+      '/payment/topup/intent',
+      { amountGBP }
+    ),
 };
 
 export const walletApi = {
