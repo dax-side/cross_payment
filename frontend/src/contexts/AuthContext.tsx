@@ -28,26 +28,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const accessToken = localStorage.getItem('accessToken');
-      const refreshToken = localStorage.getItem('refreshToken');
-
-      if (accessToken || refreshToken) {
-        try {
-          if (!accessToken && refreshToken) {
-            const { data } = await authApi.refresh(refreshToken);
-            localStorage.setItem('accessToken', data.data.tokens.accessToken);
-            localStorage.setItem('refreshToken', data.data.tokens.refreshToken);
-            setSessionRestored(true);
-          }
-
-          const { data } = await authApi.getProfile();
-          setUser(data.data.user);
-        } catch (error) {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-        }
+      try {
+        // The axios interceptor handles token refresh automatically.
+        // If the access token is expired, it will refresh and retry the profile call.
+        // If the refresh token is also expired, it rejects and we just stay logged out.
+        const { data } = await authApi.getProfile();
+        setUser(data.data.user);
+      } catch {
+        // Not authenticated — stay as guest, don't redirect
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();
@@ -55,21 +46,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const { data } = await authApi.login({ email, password });
-    localStorage.setItem('accessToken', data.data.tokens.accessToken);
-    localStorage.setItem('refreshToken', data.data.tokens.refreshToken);
     setUser(data.data.user);
   };
 
   const register = async (email: string, password: string) => {
     const { data } = await authApi.register({ email, password });
-    localStorage.setItem('accessToken', data.data.tokens.accessToken);
-    localStorage.setItem('refreshToken', data.data.tokens.refreshToken);
     setUser(data.data.user);
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
     setUser(null);
     setSessionRestored(false);
     authApi.logout().catch(() => {});
