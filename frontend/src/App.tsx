@@ -9,7 +9,6 @@ import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import TopUp from './pages/TopUp';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const pageVariants = {
@@ -33,14 +32,6 @@ function AnimatedRoutes() {
           element={
             <ProtectedRoute>
               <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/topup"
-          element={
-            <ProtectedRoute>
-              <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ duration: 0.2 }}><TopUp /></motion.div>
             </ProtectedRoute>
           }
         />
