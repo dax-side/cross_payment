@@ -12,6 +12,7 @@ import { useSocket } from '../hooks/useSocket';
 import { CardSkeleton, TransactionSkeleton } from '../components/Skeleton';
 import TransactionModal from '../components/TransactionModal';
 import TutorialOverlay from '../components/TutorialOverlay';
+import CardPaymentForm from '../components/CardPaymentForm';
 
 interface Transaction {
   id: string;
@@ -288,8 +289,9 @@ export default function Dashboard() {
       <header className="border-b border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-[#1f3b5c] flex items-center justify-center">
-              <span className="text-[#d9b47a] font-serif font-bold text-lg">C</span>
+            <div className="h-9 w-9 rounded-xl bg-[#1f3b5c] border border-[#27496f] flex items-center justify-center relative">
+              <span className="text-[#d9b47a] font-serif font-bold text-sm tracking-tight">CP</span>
+              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#d9b47a]" />
             </div>
             <div>
               <h1 className="text-lg font-serif font-semibold tracking-tight dark:text-white">CrossPay</h1>
@@ -343,9 +345,9 @@ export default function Dashboard() {
               <motion.div data-tour="balance-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className={cardClass}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-10 w-10 rounded-xl bg-[#e7eef6] dark:bg-[#1f3b5c]/30 text-[#1f3b5c] dark:text-blue-400 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                      <path d="M21 12a9 9 0 1 1-9-9" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M3.6 9h16.8M3.6 15h16.8" strokeLinecap="round" />
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M8 6h8M8 12h7a3 3 0 0 1 0 6H8" strokeLinecap="round" />
+                      <path d="M11 4v16" strokeLinecap="round" />
                     </svg>
                   </div>
                   <div>
@@ -373,25 +375,26 @@ export default function Dashboard() {
                 </p>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className={cardClass}>
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-slate-50/75 dark:bg-slate-900/30 border border-slate-200/60 dark:border-slate-800 rounded-2xl p-5 shadow-none">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-10 w-10 rounded-xl bg-[#e6eceb] dark:bg-[#5b6b6f]/20 text-[#5b6b6f] dark:text-slate-300 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" strokeLinecap="round" strokeLinejoin="round" />
+                  <div className="h-10 w-10 rounded-xl bg-[#e6eceb]/80 dark:bg-[#5b6b6f]/15 text-[#5b6b6f] dark:text-slate-400 flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M12 3v18" strokeLinecap="round" />
+                      <path d="M16 7h-5a3 3 0 0 0 0 6h2a3 3 0 0 1 0 6H8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Treasury Wallet</p>
-                    <p className="text-2xl font-semibold dark:text-white">{Number(treasuryUsdc).toFixed(2)} USDC</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500">Treasury Wallet</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{Number(treasuryUsdc).toFixed(2)} USDC</p>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Gas: {Number(treasuryMatic).toFixed(4)} POL</p>
+                <p className="text-xs text-slate-500 dark:text-slate-500">Gas: {Number(treasuryMatic).toFixed(4)} POL</p>
                 {treasuryAddress && (
                   <a
                     href={`https://amoy.polygonscan.com/address/${treasuryAddress}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-2 inline-flex text-xs text-[#1f3b5c] dark:text-blue-400 hover:underline"
+                    className="mt-2 inline-flex text-xs text-[#1f3b5c]/80 dark:text-blue-400/90 hover:underline"
                   >
                     View treasury on explorer {'\u2197'}
                   </a>
@@ -451,9 +454,9 @@ export default function Dashboard() {
         )}
 
         {/* Account & Wallet */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className={cardClass}>
-            <h3 className="text-lg font-serif font-semibold mb-4 dark:text-white">Account Details</h3>
+        <div className="grid md:grid-cols-[0.88fr_1.12fr] gap-6 mb-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-slate-50/80 dark:bg-slate-900/35 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 shadow-none">
+            <h3 className="text-base font-serif font-semibold mb-4 dark:text-white">Account Details</h3>
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Account Name</p>
@@ -466,9 +469,9 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className={cardClass}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className={`${cardClass} p-6 ring-1 ring-[#1f3b5c]/25 dark:ring-[#93b5e0]/25`}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-serif font-semibold dark:text-white">Wallet Address</h3>
+              <h3 className="text-xl font-serif font-semibold dark:text-white">Wallet Address</h3>
               {walletAddress && (
                 <button
                   onClick={() => setShowQR(!showQR)}
@@ -615,36 +618,33 @@ export default function Dashboard() {
 
             {activeTab === 'deposit' && (
               <motion.div key="deposit" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <form onSubmit={handleDeposit} className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">Amount (GBP)</label>
-                    <input
-                      type="number"
-                      min="10"
-                      step="1"
-                      required
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      className={inputClass}
-                      placeholder="100"
-                    />
+                <div className="space-y-5">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/30 p-4">
+                    <p className="text-sm font-semibold dark:text-white mb-3">Simulated deposit (testing)</p>
+                    <form onSubmit={handleDeposit} className="flex gap-3 items-end">
+                      <div className="flex-1">
+                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">Amount (GBP)</label>
+                        <input
+                          type="number"
+                          min="10"
+                          step="1"
+                          required
+                          value={depositAmount}
+                          onChange={(e) => setDepositAmount(e.target.value)}
+                          className={inputClass}
+                          placeholder="100"
+                        />
+                      </div>
+                      <button type="submit" className={`h-11 px-6 ${btnPrimary}`}>Deposit</button>
+                    </form>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Adds demo GBP balance locally for test transfers.</p>
                   </div>
-                  <button type="submit" className={`h-11 px-6 ${btnPrimary}`}>Deposit</button>
-                </form>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Add GBP to your simulated fiat balance for testing.</p>
-                <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4">
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Or top up with a real card (Stripe test mode):</p>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/topup')}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 text-[#b07a2a] dark:text-[#e8c97a] text-sm font-semibold hover:border-[#b07a2a] dark:hover:border-[#e8c97a] transition"
-                  >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                      <line x1="1" y1="10" x2="23" y2="10" />
-                    </svg>
-                    Top Up with Card
-                  </button>
+
+                  <div className="rounded-xl border border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 p-4">
+                    <p className="text-sm font-semibold text-[#b07a2a] dark:text-[#e8c97a] mb-3">Real card payment (Stripe)</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Uses Stripe test mode checkout and webhook crediting.</p>
+                    <CardPaymentForm onSuccess={loadBalance} />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -673,31 +673,33 @@ export default function Dashboard() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Exchange Rate */}
-        <motion.div data-tour="exchange-rate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className={`${cardClass} mb-8`}>
-          <h3 className="text-lg font-serif font-semibold mb-4 dark:text-white">Exchange Rate</h3>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">GBP {'\u2192'} USDC</p>
-              <p className="text-2xl font-semibold dark:text-white">{exchangeRate ? exchangeRate.toFixed(4) : '\u2014'}</p>
+        <div className="grid md:grid-cols-[0.95fr_1.05fr] gap-6">
+          {/* Exchange Rate */}
+          <motion.div data-tour="exchange-rate" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className={cardClass}>
+            <h3 className="text-lg font-serif font-semibold mb-4 dark:text-white">Exchange Rate</h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">GBP {'\u2192'} USDC</p>
+                <p className="text-2xl font-semibold dark:text-white">{exchangeRate ? exchangeRate.toFixed(4) : '\u2014'}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400">{rateTimestamp ? new Date(rateTimestamp).toLocaleString() : ''}</p>
+                {rateSource && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 inline-flex items-center gap-1 ${
+                    rateSource === 'live'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                  }`}>
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                    {rateSource.charAt(0).toUpperCase() + rateSource.slice(1).toLowerCase()}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-slate-400">{rateTimestamp ? new Date(rateTimestamp).toLocaleString() : ''}</p>
-              {rateSource && (
-                <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full mt-1 inline-block ${
-                  rateSource === 'live'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                }`}>
-                  {rateSource}
-                </span>
-              )}
-            </div>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Recent Activity */}
-        <motion.div data-tour="recent-activity" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className={cardClass}>
+          {/* Recent Activity */}
+          <motion.div data-tour="recent-activity" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className={cardClass}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-serif font-semibold dark:text-white">Recent Activity</h3>
             {transactions.length > 0 && (
@@ -774,7 +776,8 @@ export default function Dashboard() {
               )}
             </>
           )}
-        </motion.div>
+          </motion.div>
+        </div>
       </main>
 
       {/* Transaction Modal */}
