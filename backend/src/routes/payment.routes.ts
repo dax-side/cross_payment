@@ -39,6 +39,12 @@ router.post(
   asyncHandler(paymentController.createTopUpIntent)
 );
 
+router.post(
+  '/topup/confirm',
+  authenticate,
+  asyncHandler(paymentController.confirmTopUp)
+);
+
 router.get(
   '/:id',
   authenticate,
