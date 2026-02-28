@@ -131,6 +131,12 @@ export const paymentApi = {
       '/payment/topup/intent',
       { amountGBP }
     ),
+
+  confirmTopUp: (intentId: string) =>
+    api.post<{ success: boolean; data: { amountGBP: number; newBalance: number } }>(
+      '/payment/topup/confirm',
+      { intentId }
+    ),
 };
 
 export const walletApi = {
