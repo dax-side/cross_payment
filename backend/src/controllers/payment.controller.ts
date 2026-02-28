@@ -7,6 +7,7 @@ import { User } from '../models/User.model';
 import { IExchangeRate } from '../types';
 import { SendPaymentInput, PaginationInput } from '../validation/schemas';
 import { sendSuccess, SuccessMessages, UnauthorizedError, BadRequestError, NotFoundError, ErrorMessages } from '../shared';
+import { emitBalanceUpdate } from '../config/socket';
 
 /**
  * @swagger
@@ -275,6 +276,64 @@ export const createTopUpIntent = async (req: Request, res: Response): Promise<vo
 };
 
 /**
+ * Called by the frontend after stripe.confirmPayment() succeeds.
+ * Retrieves the PaymentIntent from Stripe, verifies it matches the
+ * authenticated user, and credits fiatBalance (idempotent via metadata flag).
+ */
+
+export const confirmTopUp = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.userId;
+  if (!userId) throw new UnauthorizedError(ErrorMessages.AUTH.INVALID_TOKEN);
+
+  const { intentId } = req.body as { intentId?: string };
+  if (!intentId || typeof intentId !== 'string') {
+    throw new BadRequestError('intentId is required');
+  }
+
+  const intent = await stripe.paymentIntents.retrieve(intentId);
+
+  if (intent.metadata?.userId !== userId) {
+    throw new UnauthorizedError('PaymentIntent does not belong to this user');
+  }
+
+  if (intent.status !== 'succeeded') {
+    throw new BadRequestError(`Payment has not succeeded (status: ${intent.status})`);
+  }
+
+  if (intent.metadata?.credited === '1') {
+    const user = await User.findById(userId);
+    logger.info('Stripe top-up already credited (idempotent)', { userId, intentId });
+    sendSuccess(res, SuccessMessages.PAYMENT.TOPUP_SUCCESS, {
+      amountGBP: parseFloat(intent.metadata?.amountGBP ?? '0'),
+      newBalance: user?.fiatBalance ?? 0,
+    });
+    return;
+  }
+
+  const amountGBP = parseFloat(intent.metadata?.amountGBP ?? '0');
+  if (!amountGBP || amountGBP <= 0) {
+    throw new BadRequestError('Invalid amount in PaymentIntent metadata');
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw new NotFoundError('User not found');
+
+  user.fiatBalance = (user.fiatBalance || 0) + amountGBP;
+  await user.save();
+
+  await stripe.paymentIntents.update(intentId, { metadata: { ...intent.metadata, credited: '1' } });
+
+  emitBalanceUpdate(userId, { fiatBalance: user.fiatBalance });
+
+  logger.info('Stripe top-up confirmed and credited', { userId, amountGBP, newBalance: user.fiatBalance, intentId });
+
+  sendSuccess(res, SuccessMessages.PAYMENT.TOPUP_SUCCESS, {
+    amountGBP,
+    newBalance: user.fiatBalance,
+  });
+};
+
+/**
  * Stripe webhook receive raw (un-parsed) request body.
  * Called by Stripe on payment_intent.succeeded.
  * Credits user fiatBalance.
@@ -318,10 +377,20 @@ export const handleStripeWebhook = async (req: Request, res: Response): Promise<
       return;
     }
 
+    if (intent.metadata?.credited === '1') {
+      logger.info('Stripe webhook: intent already credited, skipping', { intentId: intent.id });
+      res.json({ received: true });
+      return;
+    }
+
     user.fiatBalance = (user.fiatBalance || 0) + amountGBP;
     await user.save();
 
-    logger.info('Stripe top-up credited', { userId, amountGBP, newBalance: user.fiatBalance });
+    await stripe.paymentIntents.update(intent.id, { metadata: { ...intent.metadata, credited: '1' } });
+
+    emitBalanceUpdate(userId, { fiatBalance: user.fiatBalance });
+
+    logger.info('Stripe top-up credited via webhook', { userId, amountGBP, newBalance: user.fiatBalance });
   }
 
   res.json({ received: true });
