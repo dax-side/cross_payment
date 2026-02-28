@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import BrandMark from '../components/BrandMark';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -35,12 +36,7 @@ export default function Login() {
     <div className="min-h-screen bg-[#f6f2eb] flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-white to-blue-100" />
-            </div>
-            <h1 className="text-xl font-semibold tracking-tight">CrossPay</h1>
-          </Link>
+          <BrandMark centered className="mb-6" />
           <h2 className="text-2xl font-serif font-semibold mb-2">Welcome back</h2>
           <p className="text-sm text-slate-600">Sign in to your account</p>
         </div>
