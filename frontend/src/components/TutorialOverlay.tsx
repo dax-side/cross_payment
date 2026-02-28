@@ -73,7 +73,6 @@ export default function TutorialOverlay() {
     }
   }, [active, step]);
 
-  // Retry measuring until we find the element
   useEffect(() => {
     measureTarget();
     const interval = setInterval(() => {
@@ -171,15 +170,15 @@ export default function TutorialOverlay() {
         onClick={finish}
       />
 
-      {/* Gold ring around target */}
+      {/* Soft highlight around target */}
       <div
-        className="absolute rounded-xl border-2 border-[#d9b47a] pointer-events-none"
+        className="absolute rounded-xl border border-[#d9b47a]/30 pointer-events-none"
         style={{
           top: rect.top - pad,
           left: rect.left - pad,
           width: rect.width + pad * 2,
           height: rect.height + pad * 2,
-          boxShadow: '0 0 0 4px rgba(217, 180, 122, 0.25)',
+          boxShadow: '0 0 10px 1px rgba(217, 180, 122, 0.12), inset 0 0 0 1px rgba(217, 180, 122, 0.18)',
         }}
       />
 
