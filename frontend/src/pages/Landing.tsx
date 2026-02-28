@@ -23,12 +23,12 @@ export default function Landing() {
         <header className="border-b border-slate-200/80 dark:border-slate-800/80">
           <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-[#1f3b5c] flex items-center justify-center">
-                <span className="text-[#e8c97a] font-serif font-bold text-lg">C</span>
+              <div className="h-9 w-9 rounded-xl bg-[#1f3b5c] border border-[#27496f] flex items-center justify-center relative">
+                <span className="text-[#e8c97a] font-serif font-bold text-sm tracking-tight">CP</span>
+                <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#e8c97a]" />
               </div>
               <div>
                 <h1 className="text-lg font-semibold tracking-tight dark:text-white">CrossPay</h1>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-slate-400">Private client</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -63,7 +63,7 @@ export default function Landing() {
 
         {/* Hero */}
         <main className="relative">
-          <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 grid lg:grid-cols-2 gap-14 items-center">
+          <section className="max-w-6xl mx-auto px-6 pt-16 md:pt-20 pb-16 grid lg:grid-cols-2 gap-8 md:gap-14 items-center">
             {/* Copy */}
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[#b07a2a] dark:text-[#e8c97a] font-semibold mb-5">
@@ -74,11 +74,11 @@ export default function Landing() {
                 <span className="text-[#b07a2a] dark:text-[#e8c97a]">Settle in USDC.</span>
               </h2>
               <div className="h-[3px] w-20 bg-[#b07a2a] dark:bg-[#e8c97a] rounded-full mb-7" />
-              <p className="text-xl text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
+              <p className="text-xl text-slate-600 dark:text-slate-400 mb-7 md:mb-10 leading-relaxed">
                 Send by email. Convert at live rates. Settle on Polygon in seconds —{' '}
                 <span className="text-slate-800 dark:text-slate-200 font-medium">one flat 0.5% fee</span>, nothing hidden.
               </p>
-              <div className="flex flex-wrap gap-3 mb-10">
+              <div className="flex flex-wrap gap-3 mb-7 md:mb-10">
                 <Link
                   to="/register"
                   className="bg-[#1f3b5c] text-white px-7 py-3.5 rounded-xl text-sm font-semibold shadow-md hover:bg-[#17304d] transition"
@@ -94,8 +94,8 @@ export default function Landing() {
               </div>
               <div className="flex items-center gap-5 text-sm text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />On-chain settlement</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b07a2a] dark:bg-[#e8c97a]" />24/7 available</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-slate-400" />No minimums</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />24/7 available</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />No minimums</span>
               </div>
             </div>
 
@@ -175,8 +175,8 @@ export default function Landing() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] transition hover:-translate-y-1">
-                <div className="h-10 w-10 rounded-xl bg-[#e7eef6] dark:bg-[#1f3b5c]/30 text-[#1f3b5c] dark:text-[#93b5e0] flex items-center justify-center mb-4">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <div className="h-12 w-12 rounded-xl bg-[#e7eef6] dark:bg-[#1f3b5c]/30 text-[#1f3b5c] dark:text-[#93b5e0] flex items-center justify-center mb-5">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6">
                     <path d="M4 7h16M4 12h10M4 17h7" strokeLinecap="round" />
                   </svg>
                 </div>
@@ -186,8 +186,8 @@ export default function Landing() {
                 </p>
               </div>
               <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] transition hover:-translate-y-1">
-                <div className="h-10 w-10 rounded-xl bg-[#f4e6d2] dark:bg-[#b07a2a]/20 text-[#b07a2a] dark:text-[#d9b47a] flex items-center justify-center mb-4">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <div className="h-12 w-12 rounded-xl bg-[#f4e6d2] dark:bg-[#b07a2a]/20 text-[#b07a2a] dark:text-[#d9b47a] flex items-center justify-center mb-5">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6">
                     <path d="M13 4l-2 7h6l-8 9 2-7H5l8-9z" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
@@ -197,8 +197,8 @@ export default function Landing() {
                 </p>
               </div>
               <div className="bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-6 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] transition hover:-translate-y-1">
-                <div className="h-10 w-10 rounded-xl bg-[#e6eceb] dark:bg-[#5b6b6f]/20 text-[#5b6b6f] dark:text-[#8fa5a9] flex items-center justify-center mb-4">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <div className="h-12 w-12 rounded-xl bg-[#e6eceb] dark:bg-[#5b6b6f]/20 text-[#5b6b6f] dark:text-[#8fa5a9] flex items-center justify-center mb-5">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.6">
                     <path d="M7 14a3 3 0 1 1 3-3M14 17a3 3 0 1 0-3-3" strokeLinecap="round" />
                     <path d="M3 21a6 6 0 0 1 10.5-3.5M10.5 17.5A6 6 0 0 1 21 21" strokeLinecap="round" />
                   </svg>
@@ -219,18 +219,20 @@ export default function Landing() {
             </div>
             <div className="max-w-2xl">
               <h3 className="text-2xl font-serif font-semibold mb-4 dark:text-white">Security details</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                This demo uses standard authentication and safe key handling. Check the{' '}
-                <a
-                  href="https://github.com/dax-side/cross_payment/blob/main/README.md"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[#1f3b5c] dark:text-[#93b5e0] hover:underline font-medium"
-                >
-                  README
-                </a>
-                {' '}for the full list of protections and limitations.
-              </p>
+              <ul className="space-y-3 text-slate-600 dark:text-slate-400">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#b07a2a] dark:bg-[#e8c97a]" />
+                  <span>Passwords are hashed with bcrypt before storage.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#b07a2a] dark:bg-[#e8c97a]" />
+                  <span>Wallet private keys are encrypted at rest with AES-256.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#b07a2a] dark:bg-[#e8c97a]" />
+                  <span>Transfers are verifiable on-chain via transaction hash.</span>
+                </li>
+              </ul>
             </div>
           </section>
 
