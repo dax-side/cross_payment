@@ -222,6 +222,7 @@ const isValidChain = async (): Promise<boolean> => {
 const getMasterWalletBalance = async (): Promise<{
   maticBalance: string;
   usdcBalance: string;
+  offline?: boolean;
 }> => {
   try {
     const masterWallet = getMasterWallet();
@@ -235,8 +236,8 @@ const getMasterWalletBalance = async (): Promise<{
       usdcBalance
     };
   } catch (error) {
-    logger.error('Failed to get master wallet balance', { error });
-    throw new Error('Failed to get master wallet balance');
+    logger.warn('Failed to get master wallet balance, returning offline placeholder', { error });
+    return { maticBalance: '0.0', usdcBalance: '0.0', offline: true };
   }
 };
 
