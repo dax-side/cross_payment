@@ -17,9 +17,10 @@ interface CheckoutInnerProps {
   amountGBP: number;
   onSuccess?: () => Promise<void> | void;
   onError: (message: string) => void;
+  onDone: () => void;
 }
 
-function CheckoutInner({ amountGBP, onSuccess, onError }: CheckoutInnerProps) {
+function CheckoutInner({ amountGBP, onSuccess, onError, onDone }: CheckoutInnerProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -47,16 +48,18 @@ function CheckoutInner({ amountGBP, onSuccess, onError }: CheckoutInnerProps) {
 
     const status = result.paymentIntent?.status;
     if (status === 'succeeded' || status === 'processing' || !status) {
-      // Confirm with backend to credit the fiatBalance
       try {
         const intentId = result.paymentIntent?.id;
         if (intentId) {
           await paymentApi.confirmTopUp(intentId);
         }
       } catch {
+        // webhook fallback handles it
       }
       toast.success(`£${amountGBP.toFixed(2)} added to your balance.`);
       await onSuccess?.();
+      setProcessing(false);
+      onDone(); // reset parent form back to amount input
       return;
     }
 
@@ -72,7 +75,7 @@ function CheckoutInner({ amountGBP, onSuccess, onError }: CheckoutInnerProps) {
         disabled={!stripe || processing}
         className="w-full bg-[#1f3b5c] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#17304d] disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
-        {processing ? 'Processing payment...' : `Pay £${(typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP).toFixed(2)}`}
+        {processing ? 'Processing payment...' : `Pay £${amountGBP.toFixed(2)}`}
       </button>
     </form>
   );
@@ -185,7 +188,15 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
 
       {clientSecret && elementOptions && (
         <Elements stripe={stripePromise} options={elementOptions}>
-          <CheckoutInner amountGBP={typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP} onSuccess={onSuccess} onError={setError} />
+          <CheckoutInner
+            amountGBP={typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP}
+            onSuccess={onSuccess}
+            onError={setError}
+            onDone={() => {
+              setClientSecret(null);
+              setAmountGBP(50);
+            }}
+          />
         </Elements>
       )}
 
