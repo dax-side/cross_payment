@@ -72,7 +72,7 @@ function CheckoutInner({ amountGBP, onSuccess, onError }: CheckoutInnerProps) {
         disabled={!stripe || processing}
         className="w-full bg-[#1f3b5c] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#17304d] disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
-        {processing ? 'Processing payment...' : `Pay £${amountGBP.toFixed(2)}`}
+        {processing ? 'Processing payment...' : `Pay £${(typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP).toFixed(2)}`}
       </button>
     </form>
   );
@@ -80,7 +80,7 @@ function CheckoutInner({ amountGBP, onSuccess, onError }: CheckoutInnerProps) {
 
 export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
   const { dark } = useDarkMode();
-  const [amountGBP, setAmountGBP] = useState(50);
+  const [amountGBP, setAmountGBP] = useState<number | string>(50);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState('');
@@ -114,7 +114,8 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
   );
 
   const createIntent = async () => {
-    if (!amountGBP || amountGBP < 1) {
+    const amount = typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP;
+    if (!amount || isNaN(amount) || amount < 1) {
       setError('Enter a valid amount (minimum £1).');
       return;
     }
@@ -122,7 +123,7 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
     setError('');
     setPreparing(true);
     try {
-      const { data } = await paymentApi.createTopUpIntent(amountGBP);
+      const { data } = await paymentApi.createTopUpIntent(amount);
       setClientSecret(data.data.clientSecret);
     } catch (err: any) {
       const apiError = err.response?.data;
@@ -158,7 +159,8 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
             step="0.01"
             value={amountGBP}
             onChange={(e) => {
-              setAmountGBP(Number(e.target.value));
+              const val = e.target.value;
+              setAmountGBP(val === '' ? '' : parseFloat(val) || '');
               if (clientSecret) setClientSecret(null);
             }}
             className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1f3b5c] focus:border-transparent transition"
@@ -183,7 +185,7 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
 
       {clientSecret && elementOptions && (
         <Elements stripe={stripePromise} options={elementOptions}>
-          <CheckoutInner amountGBP={amountGBP} onSuccess={onSuccess} onError={setError} />
+          <CheckoutInner amountGBP={typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP} onSuccess={onSuccess} onError={setError} />
         </Elements>
       )}
 
