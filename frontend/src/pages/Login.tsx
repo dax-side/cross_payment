@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import BrandMark from '../components/BrandMark';
 
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const resetSuccess = searchParams.get('reset') === '1';
+
+  // Already authenticated (cookie still valid) — skip the login form entirely
+  if (!authLoading && isAuthenticated) return <Navigate to="/dashboard" replace />;
+  // While the session check is in-flight, render nothing to avoid a flash of the login form
+  if (authLoading) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -31,7 +31,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data } = await authApi.getProfile();
         setUser(data.data.user);
+        setSessionRestored(true); // cookie was valid — session silently restored
       } catch {
+        // no valid session; user stays unauthenticated
       } finally {
         setLoading(false);
       }
