@@ -146,23 +146,29 @@ const requestPasswordReset = async (email: string): Promise<void> => {
 const resetPassword = async (email: string, token: string, newPassword: string): Promise<void> => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-  const user = await User
-    .findOne({ email: email.toLowerCase() })
-    .select('+passwordResetToken +passwordResetExpires');
+  // Include token match AND expiry check in the query itself — if either fails,
+  // findOne returns null and we throw a single generic error (no timing leak).
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: new Date() }
+  }).select('+passwordResetToken +passwordResetExpires');
 
-  if (
-    !user ||
-    user.passwordResetToken !== hashedToken ||
-    !user.passwordResetExpires ||
-    user.passwordResetExpires < new Date()
-  ) {
+  if (!user) {
     throw new BadRequestError('Reset link is invalid or has expired.');
   }
 
-  user.passwordHash = await hashPassword(newPassword);
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-  await user.save();
+  const newHash = await hashPassword(newPassword);
+
+  // Use updateOne with $unset so Mongoose reliably removes the fields from MongoDB
+  // rather than leaving them as null (Mongoose 8 undefined-assignment quirk).
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: { passwordHash: newHash },
+      $unset: { passwordResetToken: '', passwordResetExpires: '' }
+    }
+  );
 
   logger.info('Password reset completed', { email });
 };
