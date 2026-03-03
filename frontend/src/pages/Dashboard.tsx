@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -78,6 +78,8 @@ export default function Dashboard() {
   const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [activeTab, setActiveTab] = useState<'send' | 'deposit' | 'withdraw'>('send');
+
+  const sessionToastShownRef = useRef(false);
 
   const displayName = useMemo(() => {
     if (user?.email) return user.email.split('@')[0];
@@ -167,7 +169,8 @@ export default function Dashboard() {
   }, [onTransactionUpdate, onBalanceUpdate]);
 
   useEffect(() => {
-    if (sessionRestored) {
+    if (sessionRestored && !sessionToastShownRef.current) {
+      sessionToastShownRef.current = true;
       toast('Welcome back. We kept your seat warm.', { icon: '✓' });
       clearSessionRestored();
     }
