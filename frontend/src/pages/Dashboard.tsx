@@ -168,7 +168,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (sessionRestored) {
-      toast('Session restored \u2014 you\u2019re still signed in.', { icon: '\uD83D\uDD12' });
+      toast('Welcome back. We kept your seat warm.', { icon: '✓' });
       clearSessionRestored();
     }
   }, [sessionRestored, clearSessionRestored]);
