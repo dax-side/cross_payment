@@ -58,6 +58,24 @@ const createApp = (): Express => {
 
   app.use(morgan('combined', { stream: morganStream }));
 
+  // Temporary Stripe diagnostic — remove after confirming Stripe works in prod
+  app.get('/api/stripe-diag', async (_req, res) => {
+    try {
+      const { getStripe } = await import('./config/stripe');
+      const s = getStripe();
+      // Retrieve a non-existent intent — will throw a 'no such' error but proves auth works
+      await s.paymentIntents.retrieve('pi_diagnostic_test').catch((err: any) => {
+        if (err?.code === 'resource_missing') {
+          res.json({ stripe: 'connected', keyPrefix: process.env.STRIPE_SECRET_KEY?.slice(0, 12) + '...' });
+        } else {
+          res.json({ stripe: 'error', errorType: err?.constructor?.name, errorMessage: err?.message, keyPrefix: process.env.STRIPE_SECRET_KEY?.slice(0, 12) + '...' });
+        }
+      });
+    } catch (err: any) {
+      res.json({ stripe: 'init_failed', errorType: err?.constructor?.name, errorMessage: err?.message });
+    }
+  });
+
   app.get('/health', async (_req, res) => {
     let dbStatus = 'disconnected';
     let rpcStatus = 'unreachable';

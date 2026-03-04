@@ -15,12 +15,13 @@ export const asyncHandler = (fn: AsyncHandler): AsyncHandler => {
     try {
       await fn(req, res, next);
     } catch (error) {
-
-      logger.warn('Request handler threw', {
+      // Use info level so it surfaces in all platform log viewers
+      logger.info('Request error', {
         method: req.method,
         path: req.path,
         errorType: error instanceof Error ? error.constructor.name : typeof error,
         errorMessage: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack?.split('\n').slice(0, 3).join(' | ') : undefined,
       });
       next(error);
     }
