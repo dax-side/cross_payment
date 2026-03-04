@@ -13,6 +13,11 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'cross-payment-api' },
   transports: [
+    new winston.transports.Console({
+      format: process.env.NODE_ENV === 'production'
+        ? combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true }), json())
+        : combine(colorize(), simple()),
+    }),
     new winston.transports.File({ 
       filename: 'logs/error.log', 
       level: 'error',
@@ -26,15 +31,6 @@ const logger = winston.createLogger({
     })
   ]
 });
-
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: combine(
-      colorize(),
-      simple()
-    )
-  }));
-}
 
 const morganStream = {
   write: (message: string): void => {
