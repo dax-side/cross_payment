@@ -23,7 +23,25 @@ const startServer = async (): Promise<void> => {
       const baseUrl = process.env.NODE_ENV === 'production'
         ? (process.env.BACKEND_URL ?? `http://localhost:${PORT}`)
         : `http://localhost:${PORT}`;
-      
+
+      // Startup config diagnostic — makes missing env vars immediately visible in logs
+      const configStatus = {
+        stripe: !!process.env.STRIPE_SECRET_KEY,
+        stripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+        smtp: !!process.env.SMTP_USER && !!process.env.SMTP_PASS,
+        polygon: !!process.env.POLYGON_RPC_URL,
+        masterWallet: !!process.env.MASTER_WALLET_PRIVATE_KEY,
+        frontendUrl: process.env.FRONTEND_URL ?? '(not set)',
+      };
+      const missing = Object.entries(configStatus)
+        .filter(([, v]) => v === false)
+        .map(([k]) => k);
+      if (missing.length > 0) {
+        logger.error('Missing required environment variables', { missing });
+      } else {
+        logger.info('All required environment variables are set', { configStatus });
+      }
+
       logger.info(`Server started on port ${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV ?? 'development',

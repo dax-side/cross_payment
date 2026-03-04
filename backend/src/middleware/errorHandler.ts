@@ -81,7 +81,8 @@ export const errorHandler = (
   }
 
   logger.error('Unhandled error', { 
-    error: error.message, 
+    error: error.message,
+    type: error.constructor?.name,
     stack: error.stack 
   });
 
