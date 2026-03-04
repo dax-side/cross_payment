@@ -20,10 +20,14 @@ const startServer = async (): Promise<void> => {
     initSocket(httpServer);
 
     httpServer.listen(PORT, () => {
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? (process.env.BACKEND_URL ?? `http://localhost:${PORT}`)
+        : `http://localhost:${PORT}`;
+      
       logger.info(`Server started on port ${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV ?? 'development',
-        apiDocs: `http://localhost:${PORT}/api-docs`,
+        apiDocs: `${baseUrl}/api-docs`,
         websocket: 'enabled'
       });
     });
