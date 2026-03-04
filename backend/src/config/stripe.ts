@@ -9,7 +9,7 @@ export const getStripe = (): Stripe => {
     throw new Error('STRIPE_SECRET_KEY is not set. Add it to your environment variables.');
   }
   _stripe = new Stripe(key as string, {
-    apiVersion: '2024-12-18.acacia' as Stripe.LatestApiVersion,
+    apiVersion: '2025-07-30.basil' as Stripe.LatestApiVersion,
   });
   return _stripe;
 };
