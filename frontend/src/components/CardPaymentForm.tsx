@@ -177,7 +177,7 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
             disabled={preparing}
             className="h-11 px-4 rounded-lg bg-[#1f3b5c] text-white text-sm font-medium hover:bg-[#1a324d] disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {preparing ? 'Loading...' : 'Load card form'}
+            {preparing ? 'Loading...' : 'Pay with card'}
           </button>
         )}
       </div>
