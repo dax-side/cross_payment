@@ -118,8 +118,8 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
 
   const createIntent = async () => {
     const amount = typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP;
-    if (!amount || isNaN(amount) || amount < 1) {
-      setError('Enter a valid amount (minimum £1).');
+    if (!amount || isNaN(amount) || amount < 10) {
+      setError('Minimum deposit is £10. Yes, really.');
       return;
     }
 
@@ -158,7 +158,6 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
           <label className="block text-xs text-slate-500 dark:text-slate-300 mb-2">Amount (GBP)</label>
           <input
             type="number"
-            min="1"
             step="0.01"
             value={amountGBP}
             onChange={(e) => {
