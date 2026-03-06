@@ -91,20 +91,20 @@ export const sendTransferSentEmail = async (
   const mailOptions = {
     from: `"CrossPay" <${process.env.SMTP_USER}>`,
     to: senderEmail,
-    subject: `You sent £${amountGBP.toFixed(2)} via CrossPay`,
+    subject: `£${amountGBP.toFixed(2)} left the building.`,
     html: baseTemplate(`
-      <h1 style="font-size:20px; font-weight:600; color:#0f172a; margin:0 0 12px;">Transfer sent.</h1>
+      <h1 style="font-size:20px; font-weight:600; color:#0f172a; margin:0 0 12px;">Money sent. Done. Gone.</h1>
       <p style="color:#475569; font-size:14px; line-height:1.6; margin:0 0 16px;">
-        Your transfer of <strong>£${amountGBP.toFixed(2)}</strong> (${amountUSDC.toFixed(6)} USDC) to <strong>${recipientEmail}</strong> has been completed and settled on Polygon.
+        <strong>£${amountGBP.toFixed(2)}</strong> just left your account, converted to <strong>${amountUSDC.toFixed(6)} USDC</strong>, and is on its way to <strong>${recipientEmail}</strong> via Polygon. No bank involved. No 3–5 business days of nothing. Just done.
       </p>
       <table style="width:100%; border-collapse:collapse; font-size:13px; color:#475569; margin-bottom:24px;">
-        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">Amount sent</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">£${amountGBP.toFixed(2)}</td></tr>
-        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">USDC transferred</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">${amountUSDC.toFixed(6)} USDC</td></tr>
-        <tr><td style="padding:6px 0;">Recipient</td><td style="padding:6px 0; text-align:right; color:#0f172a;">${recipientEmail}</td></tr>
+        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">You sent</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">£${amountGBP.toFixed(2)}</td></tr>
+        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">On-chain settlement</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">${amountUSDC.toFixed(6)} USDC</td></tr>
+        <tr><td style="padding:6px 0;">To</td><td style="padding:6px 0; text-align:right; color:#0f172a;">${recipientEmail}</td></tr>
       </table>
-      ${explorerLink ? `<a href="${explorerLink}" style="${buttonStyle}">View on Polygon Explorer ↗</a>` : ''}
+      ${explorerLink ? `<a href="${explorerLink}" style="${buttonStyle}">Verify on Polygon ↗</a>` : ''}
       <p style="color:#94a3b8; font-size:12px; margin:24px 0 0;">
-        If you didn't initiate this transfer, contact support immediately.
+        Wasn't you? Reply to this email or contact us at <a href="mailto:crosspayment.noreply@gmail.com" style="color:#1f3b5c;">crosspayment.noreply@gmail.com</a> immediately.
       </p>
     `),
   };
@@ -125,19 +125,23 @@ export const sendTransferReceivedEmail = async (
   const mailOptions = {
     from: `"CrossPay" <${process.env.SMTP_USER}>`,
     to: recipientEmail,
-    subject: `You received £${amountGBP.toFixed(2)} on CrossPay`,
+    subject: `You just got paid. £${amountGBP.toFixed(2)} incoming.`,
     html: baseTemplate(`
-      <h1 style="font-size:20px; font-weight:600; color:#0f172a; margin:0 0 12px;">Money received.</h1>
+      <h1 style="font-size:20px; font-weight:600; color:#0f172a; margin:0 0 12px;">Someone sent you money.</h1>
       <p style="color:#475569; font-size:14px; line-height:1.6; margin:0 0 16px;">
-        <strong>${senderEmail}</strong> sent you <strong>£${amountGBP.toFixed(2)}</strong> (${amountUSDC.toFixed(6)} USDC). It's in your CrossPay wallet now.
+        <strong>${senderEmail}</strong> just dropped <strong>£${amountGBP.toFixed(2)}</strong> into your CrossPay wallet.
+        That's <strong>${amountUSDC.toFixed(6)} USDC</strong> settled on Polygon. Already there. Already yours.
       </p>
       <table style="width:100%; border-collapse:collapse; font-size:13px; color:#475569; margin-bottom:24px;">
-        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">Amount received</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">£${amountGBP.toFixed(2)}</td></tr>
-        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">USDC received</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">${amountUSDC.toFixed(6)} USDC</td></tr>
+        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">You received</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">£${amountGBP.toFixed(2)}</td></tr>
+        <tr><td style="padding:6px 0; border-bottom:1px solid #f1f5f9;">USDC in wallet</td><td style="padding:6px 0; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:600; color:#0f172a;">${amountUSDC.toFixed(6)} USDC</td></tr>
         <tr><td style="padding:6px 0;">From</td><td style="padding:6px 0; text-align:right; color:#0f172a;">${senderEmail}</td></tr>
       </table>
-      ${explorerLink ? `<a href="${explorerLink}" style="${buttonStyle}">View on Polygon Explorer ↗</a>` : ''}
-      <a href="${process.env.FRONTEND_URL}/dashboard" style="${buttonStyle}; margin-left:12px;">View your dashboard</a>
+      ${explorerLink ? `<a href="${explorerLink}" style="${buttonStyle}">See it on Polygon ↗</a>` : ''}
+      <a href="${process.env.FRONTEND_URL}/dashboard" style="${buttonStyle}; margin-left:${explorerLink ? '12px' : '0'};">Open dashboard</a>
+      <p style="color:#94a3b8; font-size:12px; margin:24px 0 0;">
+        Questions? Hit reply or email <a href="mailto:crosspayment.noreply@gmail.com" style="color:#1f3b5c;">crosspayment.noreply@gmail.com</a>.
+      </p>
     `),
   };
 
