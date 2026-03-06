@@ -10,6 +10,9 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
+  const user = await User.findById(userId).select('email').lean();
+  const userEmail = user?.email ?? '';
+
   const [sentStats, receivedStats, statusBreakdown, volumeOverTime] = await Promise.all([
     Transaction.aggregate([
       { $match: { senderId: userObjectId } },
@@ -24,20 +27,16 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       }
     ]),
 
-    (async () => {
-      const user = await User.findById(userId).select('email');
-      if (!user) return [];
-      return Transaction.aggregate([
-        { $match: { recipientEmail: user.email, status: 'completed' } },
-        {
-          $group: {
-            _id: null,
-            totalUSDC: { $sum: '$amountUSDC' },
-            count: { $sum: 1 }
-          }
+    Transaction.aggregate([
+      { $match: { recipientEmail: userEmail, status: 'completed' } },
+      {
+        $group: {
+          _id: null,
+          totalUSDC: { $sum: '$amountUSDC' },
+          count: { $sum: 1 }
         }
-      ]);
-    })(),
+      }
+    ]),
 
     Transaction.aggregate([
       { $match: { senderId: userObjectId } },
@@ -80,7 +79,7 @@ export const getAnalytics = async (req: Request, res: Response): Promise<void> =
       count: received.count
     },
     statusBreakdown: statuses,
-    volumeOverTime: volumeOverTime.map((v: { _id: string; totalFiat: number; totalUSDC: number; count: number }) => ({
+    volume30d: volumeOverTime.map((v: { _id: string; totalFiat: number; totalUSDC: number; count: number }) => ({
       date: v._id,
       totalGBP: v.totalFiat,
       totalUSDC: v.totalUSDC,
