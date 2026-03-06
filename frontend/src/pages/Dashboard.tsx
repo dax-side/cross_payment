@@ -74,6 +74,7 @@ export default function Dashboard() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [txPage, setTxPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [showAllTx, setShowAllTx] = useState(false);
   const [recipientValid, setRecipientValid] = useState<boolean | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [activeTab, setActiveTab] = useState<'send' | 'deposit' | 'withdraw'>('send');
@@ -639,7 +640,7 @@ export default function Dashboard() {
           ) : (
             <>
               <div className="space-y-3">
-                {transactions.map((tx, i) => (
+                {(showAllTx ? transactions : transactions.slice(0, 1)).map((tx, i) => (
                   <motion.div
                     key={tx.id}
                     initial={{ opacity: 0, y: 10 }}
@@ -676,8 +677,19 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              {hasMore && (
+              {transactions.length > 1 && (
                 <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setShowAllTx(v => !v)}
+                    className="text-sm text-[#1f3b5c] dark:text-blue-400 hover:underline"
+                  >
+                    {showAllTx ? 'See less' : `See more (${transactions.length - 1} more)`}
+                  </button>
+                </div>
+              )}
+
+              {showAllTx && hasMore && (
+                <div className="mt-2 text-center">
                   <button
                     onClick={loadMoreTx}
                     disabled={historyLoading}
