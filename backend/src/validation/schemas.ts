@@ -44,7 +44,7 @@ export const sendPaymentSchema = z.object({
   amountGBP: z
     .number({ required_error: 'Amount is required' })
     .positive('Amount must be positive')
-    .min(1, 'Minimum amount is £1')
+    .min(5, 'Minimum transfer amount is £5')
     .max(10000, 'Maximum amount is £10,000')
 });
 
