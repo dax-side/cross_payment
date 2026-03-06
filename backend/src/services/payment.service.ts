@@ -5,6 +5,7 @@ import { blockchainService } from './blockchain.service';
 import { logger } from '../config/logger';
 import { ITransactionResponse } from '../types';
 import { emitTransactionUpdate, emitBalanceUpdate } from '../config/socket';
+import { sendTransferSentEmail, sendTransferReceivedEmail } from '../config/email';
 
 interface SendPaymentInput {
   senderId: string;
@@ -42,7 +43,7 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
       return { success: false, error: 'Sender not found' };
     }
 
-    const recipient = await User.findByEmail(input.recipientEmail);
+    const recipient = await User.findOne({ email: input.recipientEmail.toLowerCase() }).session(session);
     if (!recipient) {
       await session.abortTransaction();
       return { success: false, error: 'Recipient not found' };
@@ -114,10 +115,23 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
     transaction.txHash = transferResult.txHash ?? null;
     await transaction.save({ session });
 
+    recipient.fiatBalance = (recipient.fiatBalance || 0) + input.amountGBP;
+    await recipient.save({ session });
+
     await session.commitTransaction();
 
-    emitTransactionUpdate(input.senderId, transaction.toResponse() as unknown as Record<string, unknown>);
+    const txResponse = transaction.toResponse();
+
+    emitTransactionUpdate(input.senderId, txResponse as unknown as Record<string, unknown>);
     emitBalanceUpdate(input.senderId, { fiatBalance: sender.fiatBalance });
+
+    emitTransactionUpdate(recipient._id.toString(), txResponse as unknown as Record<string, unknown>);
+    emitBalanceUpdate(recipient._id.toString(), { fiatBalance: recipient.fiatBalance });
+
+    Promise.all([
+      sendTransferSentEmail(sender.email, recipient.email, input.amountGBP, conversion.amountUSDC, transferResult.txHash ?? null),
+      sendTransferReceivedEmail(recipient.email, sender.email, input.amountGBP, conversion.amountUSDC, transferResult.txHash ?? null),
+    ]).catch((err) => logger.warn('Transfer email failed', { error: err?.message }));
 
     logger.info('Payment completed', {
       transactionId: transaction._id.toString(),
@@ -126,7 +140,7 @@ const sendPayment = async (input: SendPaymentInput): Promise<PaymentResult> => {
 
     return {
       success: true,
-      transaction: transaction.toResponse()
+      transaction: txResponse
     };
   } catch (error) {
     await session.abortTransaction();
@@ -168,25 +182,18 @@ const getTransactionById = async (
   userId: string
 ): Promise<ITransactionResponse | null> => {
   try {
-    const transaction = await Transaction.findById(transactionId);
-    
-    if (!transaction) {
-      return null;
-    }
+    const [transaction, user] = await Promise.all([
+      Transaction.findById(transactionId),
+      User.findById(userId).select('email').lean(),
+    ]);
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return null;
-    }
+    if (!transaction || !user) return null;
 
     const isSender = transaction.senderId.toString() === userId;
     const isRecipient = transaction.recipientEmail === user.email;
 
     if (!isSender && !isRecipient) {
-      logger.warn('Unauthorized transaction access attempt', {
-        transactionId,
-        userId
-      });
+      logger.warn('Unauthorized transaction access attempt', { transactionId, userId });
       return null;
     }
 
