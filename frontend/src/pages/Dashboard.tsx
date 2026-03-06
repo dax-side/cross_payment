@@ -67,11 +67,11 @@ export default function Dashboard() {
   const [treasuryAddress, setTreasuryAddress] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
 
-  const [depositAmount, setDepositAmount] = useState('');
-  const [withdrawAmount, setWithdrawAmount] = useState('');
+
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [txPage, setTxPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -237,26 +237,13 @@ export default function Dashboard() {
     });
   };
 
-  const handleDeposit = async (e: FormEvent) => {
-    e.preventDefault();
-    try {
-      const amount = Number(depositAmount);
-      const { data } = await walletApi.deposit(amount);
-      toast.success(`Deposited \u00A3${data.data.deposited}`);
-      setDepositAmount('');
-      await loadBalance();
-    } catch (err: any) {
-      const apiError = err.response?.data;
-      toast.error(apiError?.details?.[0]?.message || apiError?.error || apiError?.message || 'Deposit failed.');
-    }
-  };
 
   const handleWithdraw = async (e: FormEvent) => {
     e.preventDefault();
     try {
       const amount = Number(withdrawAmount);
       const { data } = await walletApi.withdraw(amount);
-      toast.success(`Withdrawn \u00A3${data.data.withdrawn}`);
+      toast.success(`£${data.data.withdrawn} withdrawn from your balance.`);
       setWithdrawAmount('');
       await loadBalance();
     } catch (err: any) {
@@ -265,8 +252,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
+  const handleExportCSV = async () => {    try {
       const { data } = await analyticsApi.export();
       const url = URL.createObjectURL(data);
       const a = document.createElement('a');
@@ -621,33 +607,10 @@ export default function Dashboard() {
 
             {activeTab === 'deposit' && (
               <motion.div key="deposit" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                <div className="space-y-5">
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/30 p-4">
-                    <p className="text-sm font-semibold dark:text-white mb-3">Simulated deposit (testing)</p>
-                    <form onSubmit={handleDeposit} className="flex gap-3 items-end">
-                      <div className="flex-1">
-                        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">Amount (GBP)</label>
-                        <input
-                          type="number"
-                          min="10"
-                          step="1"
-                          required
-                          value={depositAmount}
-                          onChange={(e) => setDepositAmount(e.target.value)}
-                          className={inputClass}
-                          placeholder="100"
-                        />
-                      </div>
-                      <button type="submit" className={`h-11 px-6 ${btnPrimary}`}>Deposit</button>
-                    </form>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-3">Adds demo GBP balance locally for test transfers.</p>
-                  </div>
-
-                  <div className="rounded-xl border border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 p-4">
-                    <p className="text-sm font-semibold text-[#b07a2a] dark:text-[#e8c97a] mb-3">Real card payment (Stripe)</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Uses Stripe test mode checkout and webhook crediting.</p>
-                    <CardPaymentForm onSuccess={loadBalance} />
-                  </div>
+                <div className="rounded-xl border border-[#b07a2a]/30 dark:border-[#e8c97a]/20 bg-[#b07a2a]/5 dark:bg-[#e8c97a]/5 p-4">
+                  <p className="text-sm font-semibold text-[#b07a2a] dark:text-[#e8c97a] mb-3">Real card payment (Stripe)</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Uses Stripe test mode checkout and webhook crediting.</p>
+                  <CardPaymentForm onSuccess={loadBalance} />
                 </div>
               </motion.div>
             )}
