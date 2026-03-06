@@ -6,7 +6,6 @@ import { paymentApi, ratesApi, walletApi, analyticsApi } from '../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { QRCodeSVG } from 'qrcode.react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useSocket } from '../hooks/useSocket';
 import { CardSkeleton, TransactionSkeleton } from '../components/Skeleton';
@@ -205,8 +204,8 @@ export default function Dashboard() {
   const handleTransfer = async (e: FormEvent) => {
     e.preventDefault();
     setTransferLoading(true);
+    const amount = Number(amountGBP);
     try {
-      const amount = Number(amountGBP);
       await paymentApi.send({ recipientEmail, amountGBP: amount });
       toast.success('Transfer initiated successfully');
       setRecipientEmail('');
@@ -241,8 +240,7 @@ export default function Dashboard() {
   const handleWithdraw = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const amount = Number(withdrawAmount);
-      const { data } = await walletApi.withdraw(amount);
+      const { data } = await walletApi.withdraw(Number(withdrawAmount));
       toast.success(`£${data.data.withdrawn} withdrawn from your balance.`);
       setWithdrawAmount('');
       await loadBalance();
@@ -393,55 +391,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Volume chart */}
-        {analytics?.volume30d && analytics.volume30d.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`${cardClass} mb-8`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-serif font-semibold dark:text-white">30-Day Volume</h3>
-              <button onClick={handleExportCSV} className="text-xs text-[#1f3b5c] dark:text-blue-400 hover:underline">
-                Export CSV {'\u2193'}
-              </button>
-            </div>
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={analytics.volume30d}>
-                  <defs>
-                    <linearGradient id="volumeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1f3b5c" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#1f3b5c" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(v: string) => v.slice(5)}
-                    tick={{ fontSize: 11, fill: darkMode ? '#94a3b8' : '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: darkMode ? '#94a3b8' : '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v: number) => `${'\u00A3'}${v}`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: darkMode ? '#1e293b' : '#fff',
-                      border: '1px solid',
-                      borderColor: darkMode ? '#334155' : '#e2e8f0',
-                      borderRadius: 12,
-                      fontSize: 13,
-                      color: darkMode ? '#f1f5f9' : '#1e293b',
-                    }}
-                    formatter={(val: number | undefined) => [`${'\u00A3'}${(val ?? 0).toFixed(2)}`, 'Volume']}
-                  />
-                  <Area type="monotone" dataKey="amount" stroke="#1f3b5c" fill="url(#volumeGrad)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        )}
-
         {/* Account & Wallet */}
         <div className="grid md:grid-cols-[0.88fr_1.12fr] gap-6 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-slate-50/80 dark:bg-slate-900/35 border border-slate-200/70 dark:border-slate-800 rounded-2xl p-5 shadow-none">
@@ -562,20 +511,19 @@ export default function Dashboard() {
                       )}
                     </div>
                     {recipientValid === false && recipientEmail.includes('@') && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Recipient not found {'\u2014'} they'll need to register to claim the transfer.</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">We've never seen that email before. Get them to sign up first it's free and takes seconds.</p>
                     )}
                   </div>
                   <div>
                     <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">Amount (GBP)</label>
                     <input
                       type="number"
-                      min="1"
                       step="0.01"
                       required
                       value={amountGBP}
                       onChange={(e) => setAmountGBP(e.target.value)}
                       className={inputClass}
-                      placeholder="100.00"
+                      placeholder="10.00"
                     />
                   </div>
                   <button type="submit" disabled={transferLoading} className={`h-11 px-6 ${btnPrimary}`}>
@@ -622,13 +570,12 @@ export default function Dashboard() {
                     <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">Amount (GBP)</label>
                     <input
                       type="number"
-                      min="10"
-                      step="1"
+                      step="0.01"
                       required
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       className={inputClass}
-                      placeholder="100"
+                      placeholder="10.00"
                     />
                   </div>
                   <button type="submit" className={`h-11 px-6 ${btnPrimary}`}>Withdraw</button>
