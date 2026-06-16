@@ -1,5 +1,6 @@
 import { ethers, JsonRpcProvider, Contract, Wallet } from 'ethers';
 import { logger } from '../config/logger';
+import secureMasterWallet from './secureMasterWallet.service';
 
 const USDC_ABI = [
   'function balanceOf(address account) view returns (uint256)',
@@ -52,12 +53,8 @@ const getUSDCContract = (signerOrProvider: Wallet | JsonRpcProvider): Contract =
 };
 
 const getMasterWallet = (): Wallet => {
-  const privateKey = process.env.MASTER_WALLET_PRIVATE_KEY;
-  if (!privateKey) {
-    throw new Error('MASTER_WALLET_PRIVATE_KEY environment variable is not set');
-  }
   const provider = getProvider();
-  return new Wallet(privateKey, provider);
+  return secureMasterWallet.getWallet(provider);
 };
 
 const getUSDCBalance = async (walletAddress: string): Promise<string> => {
@@ -222,18 +219,21 @@ const isValidChain = async (): Promise<boolean> => {
 const getMasterWalletBalance = async (): Promise<{
   maticBalance: string;
   usdcBalance: string;
+  securityStats?: { accessCount: number; lastAccess: number; limit: number };
   offline?: boolean;
 }> => {
   try {
     const masterWallet = getMasterWallet();
     const provider = getProvider();
-    
+
     const maticBalance = await provider.getBalance(masterWallet.address);
     const usdcBalance = await getUSDCBalance(masterWallet.address);
+    const securityStats = secureMasterWallet.getAccessStats();
 
     return {
       maticBalance: ethers.formatEther(maticBalance),
-      usdcBalance
+      usdcBalance,
+      securityStats
     };
   } catch (error) {
     logger.warn('Failed to get master wallet balance, returning offline placeholder', { error });
