@@ -5,6 +5,7 @@ import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-
 import toast from 'react-hot-toast';
 import { paymentApi } from '../lib/api';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { MIN_AMOUNTS, MIN_AMOUNT_MESSAGES } from '../constants/amounts';
 
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined;
 const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
@@ -118,8 +119,8 @@ export default function CardPaymentForm({ onSuccess }: CardPaymentFormProps) {
 
   const createIntent = async () => {
     const amount = typeof amountGBP === 'string' ? parseFloat(amountGBP) : amountGBP;
-    if (!amount || isNaN(amount) || amount < 10) {
-      setError('Minimum deposit is £10. Yes, really.');
+    if (!amount || isNaN(amount) || amount < MIN_AMOUNTS.DEPOSIT) {
+      setError(MIN_AMOUNT_MESSAGES.DEPOSIT);
       return;
     }
 
