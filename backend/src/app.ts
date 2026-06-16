@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
@@ -23,6 +24,19 @@ const createApp = (): Express => {
 
   app.set('trust proxy', 1);
 
+
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false, 
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"],
+        frameSrc: ["'self'", "https://js.stripe.com"],
+        connectSrc: ["'self'", "https://api.stripe.com"],
+      }
+    }
+  }));
+
   const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
@@ -43,6 +57,8 @@ const createApp = (): Express => {
   };
 
   app.use(cors(corsOptions));
+
+  const doubleCsrfProtection = (_req: any, _res: any, next: any) => next();
   
   app.post(
     '/api/payment/topup/webhook',
@@ -98,9 +114,9 @@ const createApp = (): Express => {
     res.send(swaggerSpec);
   });
 
-  app.use('/api/auth', authLimiter, authRoutes);
-  app.use('/api/wallet', walletRoutes);
-  app.use('/api/payment', paymentLimiter, paymentRoutes);
+  app.use('/api/auth', authLimiter, doubleCsrfProtection, authRoutes);
+  app.use('/api/wallet', doubleCsrfProtection, walletRoutes);
+  app.use('/api/payment', paymentLimiter, doubleCsrfProtection, paymentRoutes);
   app.use('/api/rates', ratesRoutes);
   app.use('/api/analytics', analyticsRoutes);
 
