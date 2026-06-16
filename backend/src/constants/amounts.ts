@@ -1,4 +1,3 @@
-// Centralized minimum amount constants for backend validation
 export const MIN_AMOUNTS = {
   TRANSFER: 5,
   DEPOSIT: 10,
