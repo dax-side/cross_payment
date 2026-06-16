@@ -86,6 +86,10 @@ export default function Dashboard() {
     return '\u2014';
   }, [user?.email]);
 
+  const displayedTransactions = useMemo(() => {
+    return showAllTx ? transactions : transactions.slice(0, 1);
+  }, [showAllTx, transactions]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -640,7 +644,7 @@ export default function Dashboard() {
           ) : (
             <>
               <div className="space-y-3">
-                {(showAllTx ? transactions : transactions.slice(0, 1)).map((tx, i) => (
+                {displayedTransactions.map((tx, i) => (
                   <motion.div
                     key={tx.id}
                     initial={{ opacity: 0, y: 10 }}
