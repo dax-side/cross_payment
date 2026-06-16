@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MIN_AMOUNTS, MIN_AMOUNT_MESSAGES } from '../constants/amounts';
 
 export const registerSchema = z.object({
   email: z
@@ -44,7 +45,7 @@ export const sendPaymentSchema = z.object({
   amountGBP: z
     .number({ required_error: 'Amount is required' })
     .positive('Amount must be positive')
-    .min(5, 'Minimum transfer amount is £5')
+    .min(MIN_AMOUNTS.TRANSFER, MIN_AMOUNT_MESSAGES.TRANSFER)
     .max(10000, 'Maximum amount is £10,000')
 });
 
@@ -65,7 +66,7 @@ export const depositSchema = z.object({
   amount: z
     .number({ required_error: 'Amount is required' })
     .positive('Amount must be positive')
-    .min(10, 'Minimum deposit is £10')
+    .min(MIN_AMOUNTS.DEPOSIT, MIN_AMOUNT_MESSAGES.DEPOSIT)
     .max(10000, 'Maximum deposit is £10,000')
 });
 
@@ -73,7 +74,7 @@ export const withdrawSchema = z.object({
   amount: z
     .number({ required_error: 'Amount is required' })
     .positive('Amount must be positive')
-    .min(10, 'Minimum withdrawal is £10')
+    .min(MIN_AMOUNTS.WITHDRAWAL, MIN_AMOUNT_MESSAGES.WITHDRAWAL)
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
