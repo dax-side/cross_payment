@@ -9,7 +9,6 @@ class SecureMasterWallet {
   private readonly maxAccessPerHour = 100;
 
   private constructor() {
-    // Private constructor for singleton
   }
 
   public static getInstance(): SecureMasterWallet {
@@ -37,7 +36,6 @@ class SecureMasterWallet {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
-    // Reset counter if more than an hour has passed
     if (now - this.lastAccess > oneHour) {
       this.accessCount = 0;
     }
@@ -54,7 +52,6 @@ class SecureMasterWallet {
       throw new Error('Master wallet access limit exceeded');
     }
 
-    // Log suspicious access patterns
     if (this.accessCount > 50) {
       logger.warn('High frequency master wallet access detected', {
         accessCount: this.accessCount,
@@ -69,10 +66,8 @@ class SecureMasterWallet {
       this.checkAccessLimits();
 
       if (!this.wallet) {
-        // Use original key for hackathon (but with additional security measures)
         const privateKey = process.env.MASTER_WALLET_PRIVATE_KEY!;
 
-        // Validate the private key format
         if (!privateKey.startsWith('0x') || privateKey.length !== 66) {
           throw new Error('Invalid master wallet private key format');
         }
@@ -113,7 +108,6 @@ class SecureMasterWallet {
     };
   }
 
-  // Emergency methods for security incidents
   public invalidateWallet(): void {
     this.wallet = null;
     this.accessCount = 0;
